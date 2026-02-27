@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Training Zones Rechner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <style>
+        /* Your existing styles */
+    </style>
+</head>
+<body>
+    <h1>Training Zones Rechner</h1>
+    <div id="trainingZones">
+        <!-- Training zone data will be generated here -->
+    </div>
+    <button id="exportButton">Export to PDF</button>
+    <script>
+        document.getElementById('exportButton').onclick = function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text('Training Zones', 10, 10);
+
+            // Add your training zones data here
+            doc.text('Zone 1: Example Data', 10, 20);
+            doc.text('Zone 2: Example Data', 10, 30);
+            // Include all the necessary training zones data
+
+            doc.save('training_zones.pdf');
+        };
+    </script>
+</body>
+</html>
