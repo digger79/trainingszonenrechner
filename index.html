@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <!-- PDF Export -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
 
@@ -24,7 +25,6 @@
       --rvsh-good: #0f7b2d;
       --rvsh-warn: #b45309;
 
-      /* Zone colors (green -> yellow -> red) */
       --z1: #2e7d32;
       --z2: #66bb6a;
       --z3: #f9a825;
@@ -133,7 +133,7 @@
       margin: 10px 0 6px 0;
     }
 
-    input{
+    input, select{
       width:100%;
       padding: 10px 12px;
       border-radius: 10px;
@@ -143,7 +143,7 @@
       background:white;
     }
 
-    input:focus{
+    input:focus, select:focus{
       border-color: rgba(11,99,167,.6);
       box-shadow: 0 0 0 3px rgba(11,99,167,.15);
     }
@@ -177,7 +177,6 @@
       background: var(--rvsh-blue);
       color:white;
     }
-
     .btn.primary:hover{ background: #095892; }
 
     .btn.ghost{
@@ -185,7 +184,6 @@
       color: var(--rvsh-blue-dark);
       border: 1px solid rgba(11,99,167,.25);
     }
-
     .btn.ghost:hover{ background:#e2efff; }
 
     .result-header{
@@ -233,7 +231,6 @@
       color: var(--rvsh-blue-dark);
     }
 
-    /* Zone row styling */
     tr.zone-row td:first-child{
       position: relative;
       padding-left: 18px;
@@ -261,7 +258,7 @@
     tr.z4 td:first-child::before{ background: var(--z4); }
     tr.z5 td:first-child::before{ background: var(--z5); }
 
-    .marker-pill{
+    .pill{
       display:inline-block;
       padding: 4px 8px;
       border-radius: 999px;
@@ -270,7 +267,6 @@
       border: 1px solid rgba(0,0,0,.08);
       background: rgba(11,99,167,.08);
       color: var(--rvsh-blue-dark);
-      margin-right: 6px;
       white-space: nowrap;
     }
 
@@ -278,9 +274,10 @@
       font-size: 12px;
       color: var(--rvsh-muted);
       margin-top: 6px;
+      line-height: 1.35;
     }
 
-    /* Visual scale */
+    /* Scale */
     .scale-wrap{
       margin-top: 14px;
       border: 1px solid var(--rvsh-border);
@@ -295,13 +292,9 @@
       flex-wrap:wrap;
       align-items:baseline;
     }
-    .scale-title strong{
-      font-size: 13px;
-    }
-    .scale-title span{
-      font-size: 12px;
-      color: var(--rvsh-muted);
-    }
+    .scale-title strong{ font-size: 13px; }
+    .scale-title span{ font-size: 12px; color: var(--rvsh-muted); }
+
     .scale-bar{
       position: relative;
       margin-top: 10px;
@@ -312,22 +305,31 @@
       background: #e9eff7;
       display:flex;
     }
-    .seg{ height:100%; }
-    .seg.z1{ background: var(--z1); width: 10%; opacity:.85; }
-    .seg.z2{ background: var(--z2); width: 15%; opacity:.85; }
-    .seg.z3{ background: var(--z3); width: 10%; opacity:.85; }
-    .seg.z4{ background: var(--z4); width: 10%; opacity:.85; }
-    .seg.z5{ background: var(--z5); width: 5%; opacity:.85; }
+    .seg{ height:100%; opacity:.85; }
+    .seg.z1{ background: var(--z1); }
+    .seg.z2{ background: var(--z2); }
+    .seg.z3{ background: var(--z3); }
+    .seg.z4{ background: var(--z4); }
+    .seg.z5{ background: var(--z5); }
 
-    .marker-line{
+    .band-fill{
+      position:absolute;
+      top:0;
+      height:100%;
+      background: #111827;
+      opacity:.20;
+      pointer-events:none;
+    }
+    .band-line{
       position:absolute;
       top:-6px;
       width: 2px;
       height: 30px;
       background: #111827;
-      opacity:.8;
+      opacity:.85;
+      pointer-events:none;
     }
-    .marker-label{
+    .band-label{
       position:absolute;
       top: -26px;
       transform: translateX(-50%);
@@ -338,16 +340,38 @@
       padding: 2px 6px;
       border-radius: 999px;
       white-space: nowrap;
+      pointer-events:none;
     }
-    .scale-legend{
-      margin-top: 8px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      color: var(--rvsh-muted);
-      font-size: 12px;
-      line-height:1.3;
+
+    .compare{
+      margin-top: 14px;
+      border: 1px solid var(--rvsh-border);
+      border-radius: 14px;
+      background: #fbfdff;
+      overflow:hidden;
     }
+    .compare summary{
+      cursor:pointer;
+      padding: 12px 14px;
+      font-weight: 800;
+      color: var(--rvsh-blue-dark);
+      list-style:none;
+    }
+    .compare summary::-webkit-details-marker{ display:none; }
+    .compare .cmp-body{
+      padding: 0 14px 14px 14px;
+      font-size: 13px;
+      color: var(--rvsh-text);
+      line-height: 1.45;
+    }
+
+    /* Export layout tweaks (smaller canvas => smaller PDF) */
+    body.exporting header { display:none; }
+    body.exporting main { margin: 0 auto; padding: 0; }
+    body.exporting .grid{ grid-template-columns: 1fr; }
+    body.exporting .no-print{ display:none !important; }
+    body.exporting .card{ box-shadow:none; border-radius: 0; }
+    body.exporting #exportArea{ max-width: 190mm; margin: 0 auto; } /* stable A4-ish */
 
     footer{
       max-width: 980px;
@@ -372,6 +396,7 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <div class="header-inner">
@@ -383,7 +408,7 @@
         />
         <div style="min-width:0;">
           <h1>Trainingszonenrechner</h1>
-          <p>RVSH – Herzfrequenz-Zonen nach Karvonen (HRR) mit LT1/LT2 Markern</p>
+          <p>RVSH – Karvonen (HRR) · 5 Zonen · LT1/LT2 als Band</p>
         </div>
       </div>
     </div>
@@ -403,11 +428,17 @@
           <label for="ruhepuls">Ruhepuls – 1/min</label>
           <input id="ruhepuls" type="number" min="30" max="120" step="1" value="52" />
 
-          <label for="lt1">LT1 Marker (HRR-Faktor)</label>
-          <input id="lt1" type="number" min="0.50" max="0.95" step="0.01" value="0.70" />
+          <label>LT1 Band (HRR-Faktor)</label>
+          <div style="display:flex; gap:10px;">
+            <input id="lt1Lo" type="number" min="0.50" max="0.95" step="0.01" value="0.68" style="flex:1;" />
+            <input id="lt1Hi" type="number" min="0.50" max="0.95" step="0.01" value="0.72" style="flex:1;" />
+          </div>
 
-          <label for="lt2">LT2 Marker (HRR-Faktor)</label>
-          <input id="lt2" type="number" min="0.60" max="1.00" step="0.01" value="0.90" />
+          <label>LT2 Band (HRR-Faktor)</label>
+          <div style="display:flex; gap:10px;">
+            <input id="lt2Lo" type="number" min="0.60" max="1.00" step="0.01" value="0.86" style="flex:1;" />
+            <input id="lt2Hi" type="number" min="0.60" max="1.00" step="0.01" value="0.92" style="flex:1;" />
+          </div>
 
           <div class="row">
             <button class="btn primary" id="calcBtn" type="button">Berechnen</button>
@@ -417,7 +448,7 @@
 
           <div class="hint">
             Formel (Karvonen / HRR): (HFmax − Ruhepuls) × Faktor + Ruhepuls.<br/>
-            LT1/LT2 Marker sind editierbare Schätzwerte (ideal: Stufentest). Faktoren/Zonen bleiben ≤ 1,0 (sonst wäre HF > HFmax möglich).
+            Faktoren/Zonen bleiben ≤ 1,0, sonst wäre HF > HFmax möglich (unsinnig, wenn HFmax wirklich der höchste Wert ist).
           </div>
         </div>
       </section>
@@ -431,6 +462,7 @@
               <div class="factors">
                 Leistungs-orientiert (HRR): Z1 0,50–0,60 · Z2 0,60–0,75 · Z3 0,75–0,85 · Z4 0,85–0,95 · Z5 0,95–1,00
               </div>
+              <div class="factors" id="methodLine"></div>
             </div>
             <div class="badge" id="statusBadge">bereit</div>
           </div>
@@ -449,11 +481,11 @@
               <div style="font-weight:800; font-size:18px;" id="ruhepulsOut">52</div>
             </div>
             <div style="padding:10px 12px; border:1px solid var(--rvsh-border); border-radius:12px;">
-              <div style="font-size:12px; color:var(--rvsh-muted);">LT1</div>
+              <div style="font-size:12px; color:var(--rvsh-muted);">LT1 Band</div>
               <div style="font-weight:800; font-size:18px;" id="lt1Out">–</div>
             </div>
             <div style="padding:10px 12px; border:1px solid var(--rvsh-border); border-radius:12px;">
-              <div style="font-size:12px; color:var(--rvsh-muted);">LT2</div>
+              <div style="font-size:12px; color:var(--rvsh-muted);">LT2 Band</div>
               <div style="font-weight:800; font-size:18px;" id="lt2Out">–</div>
             </div>
           </div>
@@ -476,22 +508,65 @@
               <strong>Skala (Ruhe → HFmax)</strong>
               <span id="scaleMeta">–</span>
             </div>
-            <div class="scale-bar" id="scaleBar">
-              <!-- segments injected by JS -->
-              <div class="marker-line" id="lt1Line" style="left:0;"></div>
-              <div class="marker-label" id="lt1Label" style="left:0;">LT1</div>
 
-              <div class="marker-line" id="lt2Line" style="left:0;"></div>
-              <div class="marker-label" id="lt2Label" style="left:0;">LT2</div>
+            <div class="scale-bar" id="scaleBar">
+              <!-- Segmente werden per JS gesetzt -->
+              <div class="band-fill" id="lt1Fill" style="left:0; width:0;"></div>
+              <div class="band-line" id="lt1LoLine" style="left:0;"></div>
+              <div class="band-line" id="lt1HiLine" style="left:0;"></div>
+              <div class="band-label" id="lt1BandLabel" style="left:0;">LT1</div>
+
+              <div class="band-fill" id="lt2Fill" style="left:0; width:0;"></div>
+              <div class="band-line" id="lt2LoLine" style="left:0;"></div>
+              <div class="band-line" id="lt2HiLine" style="left:0;"></div>
+              <div class="band-label" id="lt2BandLabel" style="left:0;">LT2</div>
             </div>
-            <div class="scale-legend">
-              <div><span class="marker-pill">LT1</span> erste Schwelle (aerober Übergang, individuell)</div>
-              <div><span class="marker-pill">LT2</span> zweite Schwelle (nahe Wettkampf/Schwellenbereich, individuell)</div>
+
+            <div class="factors" style="margin-top:8px;">
+              <span class="pill">LT1</span> erste Schwelle (aerober Übergang, individuell) ·
+              <span class="pill">LT2</span> zweite Schwelle (nahe Schwelle/Wettkampf, individuell)
             </div>
           </div>
 
+          <!-- Visuelle/inhaltliche Prüfung anderer Interpretationen: nur für Interessierte -->
+          <details class="compare no-print">
+            <summary>Mehr Infos, Quellen & warum andere Interpretationen „falsch wirken“</summary>
+            <div class="cmp-body">
+              <p style="margin:0 0 10px 0;">
+                <strong>Karvonen / HRR</strong> (dieser Rechner): HF = Ruhe + (HFmax − Ruhe) × Faktor.<br/>
+                Wenn HFmax wirklich der höchste Wert aus Max-Test ist, sind Faktoren &gt; 1,0 unsinnig (würden HF &gt; HFmax erzeugen).
+              </p>
+
+              <p style="margin:0 0 10px 0;">
+                <strong>%HFmax</strong> (häufige Verwechslung): HF = HFmax × Faktor.<br/>
+                Das ignoriert den Ruhepuls komplett. Es führt je nach Person zu deutlich anderen Zonen. Für Leistungssteuerung kann das passen,
+                aber dann muss der Rechner explizit so heißen (und Ruhepuls wäre überflüssig).
+              </p>
+
+              <div style="margin:0 0 8px 0; font-weight:800;">Vergleich (nur als Plausibilitätscheck, keine Empfehlung):</div>
+              <table aria-label="Vergleichstabelle">
+                <thead>
+                  <tr>
+                    <th>Zone</th>
+                    <th>Karvonen (HRR)</th>
+                    <th>%HFmax</th>
+                  </tr>
+                </thead>
+                <tbody id="compareBody"></tbody>
+              </table>
+
+              <p style="margin:10px 0 0 0;">
+                <strong>Quellen/Grundlagen:</strong><br/>
+                • Karvonen MJ et al. (1957): Training und Herzfrequenzreserve (HRR-Konzept).<br/>
+                • Praktische Trainingslehre: %HRR korreliert näherungsweise mit %VO₂max → deshalb ist HRR für Zonen verbreitet.<br/>
+                Hinweis: Für Rudern im Leistungsbereich ist HF allein nicht genug → Watt/Pace/RPE ergänzen (HF-Drift durch Temperatur/Ermüdung).
+              </p>
+            </div>
+          </details>
+
           <div class="hint" style="margin-top:12px;">
-            Hinweis: Werte werden kaufmännisch auf ganze bpm gerundet. HFmax ist der höchste Wert aus Max-Belastungstest, Ruhepuls direkt nach dem Aufwachen im Liegen.
+            Hinweis: Werte werden kaufmännisch auf ganze bpm gerundet. HFmax ist der höchste Wert aus Max-Belastungstest,
+            Ruhepuls direkt nach dem Aufwachen im Liegen.
           </div>
         </div>
       </section>
@@ -500,7 +575,7 @@
 
   <footer>
     <div>
-      Hinweis: LT1/LT2 sind ohne Stufentest nur Marker. Für Leistungssteuerung zusätzlich Watt/Pace/RPE nutzen.
+      Branding: Header-Logo von rish.de. Für CI-konforme Umsetzung bitte RVSH-Gestaltungsvorgaben nutzen.
     </div>
   </footer>
 
@@ -514,9 +589,6 @@
     { name: "Zone 5", lo: 0.95, hi: 1.00, css: "z5" },
   ];
 
-  const DEFAULT_LT1 = 0.70;
-  const DEFAULT_LT2 = 0.90;
-
   function clampNumber(n, min, max){
     if (Number.isNaN(n)) return null;
     return Math.min(max, Math.max(min, n));
@@ -524,6 +596,10 @@
 
   function karvonen(hfMax, ruhe, factor){
     return (hfMax - ruhe) * factor + ruhe;
+  }
+
+  function percentMax(hfMax, factor){
+    return hfMax * factor;
   }
 
   function roundBpm(x){
@@ -544,18 +620,22 @@
     }
   }
 
-  function formatFactorRange(lo, hi){
+  function fmtFactor(lo, hi){
     return `${String(lo).replace(".", ",")} – ${String(hi).replace(".", ",")}`;
   }
 
-  function markerTags(z, lt1, lt2){
+  function overlaps(zoneLo, zoneHi, bandLo, bandHi){
+    return Math.max(zoneLo, bandLo) <= Math.min(zoneHi, bandHi);
+  }
+
+  function markerTags(z, lt1Lo, lt1Hi, lt2Lo, lt2Hi){
     const tags = [];
-    if (lt1 >= z.lo && lt1 <= z.hi) tags.push("LT1");
-    if (lt2 >= z.lo && lt2 <= z.hi) tags.push("LT2");
+    if (overlaps(z.lo, z.hi, lt1Lo, lt1Hi)) tags.push("LT1");
+    if (overlaps(z.lo, z.hi, lt2Lo, lt2Hi)) tags.push("LT2");
     return tags;
   }
 
-  function renderZones(hfMax, ruhe, lt1, lt2){
+  function renderZones(hfMax, ruhe, lt1Lo, lt1Hi, lt2Lo, lt2Hi){
     const tbody = document.getElementById("zonesBody");
     tbody.innerHTML = "";
 
@@ -571,16 +651,12 @@
       tr.appendChild(tdZone);
 
       const tdMarker = document.createElement("td");
-      const tags = markerTags(z, lt1, lt2);
-      if (tags.length){
-        tdMarker.innerHTML = tags.map(t => `<span class="marker-pill">${t}</span>`).join("");
-      } else {
-        tdMarker.textContent = "–";
-      }
+      const tags = markerTags(z, lt1Lo, lt1Hi, lt2Lo, lt2Hi);
+      tdMarker.innerHTML = tags.length ? tags.map(t => `<span class="pill">${t}</span>`).join(" ") : "–";
       tr.appendChild(tdMarker);
 
       const tdFac = document.createElement("td");
-      tdFac.textContent = formatFactorRange(z.lo, z.hi);
+      tdFac.textContent = fmtFactor(z.lo, z.hi);
       tr.appendChild(tdFac);
 
       const tdLo = document.createElement("td");
@@ -596,44 +672,71 @@
   }
 
   function buildScaleSegments(){
-    // Build segments proportional to HRR factors (0.50->1.00 only, because the calculator is performance-oriented)
     const bar = document.getElementById("scaleBar");
 
-    // Remove old segments (keep marker nodes)
-    const keepIds = new Set(["lt1Line","lt1Label","lt2Line","lt2Label"]);
+    // Remove existing segments (keep band elements)
+    const keep = new Set(["lt1Fill","lt1LoLine","lt1HiLine","lt1BandLabel","lt2Fill","lt2LoLine","lt2HiLine","lt2BandLabel"]);
     Array.from(bar.children).forEach(ch => {
-      if (!keepIds.has(ch.id)) bar.removeChild(ch);
+      if (!keep.has(ch.id)) bar.removeChild(ch);
     });
 
-    // We visualize only the used range (0.50..1.00) for readability.
-    // Convert each zone width into percent of (1.00 - 0.50) = 0.50
+    // Visualize 0.50..1.00 only
     const span = 0.50;
-
     for (const z of ZONES){
       const seg = document.createElement("div");
       seg.className = `seg ${z.css}`;
-      const w = ((z.hi - z.lo) / span) * 100;
-      seg.style.width = `${w}%`;
-      bar.insertBefore(seg, document.getElementById("lt1Line"));
+      seg.style.width = `${((z.hi - z.lo) / span) * 100}%`;
+      bar.insertBefore(seg, document.getElementById("lt1Fill"));
     }
   }
 
-  function placeMarker(lineId, labelId, factor, ruhe, hfMax, label){
-    const bar = document.getElementById("scaleBar");
-    const line = document.getElementById(lineId);
-    const lab = document.getElementById(labelId);
-
-    // Map factor from 0.50..1.00 to 0..100% of bar
+  function factorToPct(f){
     const minF = 0.50;
     const maxF = 1.00;
-    const pct = ((factor - minF) / (maxF - minF)) * 100;
-    const boundedPct = Math.min(100, Math.max(0, pct));
+    const pct = ((f - minF) / (maxF - minF)) * 100;
+    return Math.min(100, Math.max(0, pct));
+  }
 
-    const bpm = roundBpm(karvonen(hfMax, ruhe, factor));
+  function placeBand(prefix, loF, hiF, ruhe, hfMax, label){
+    const loPct = factorToPct(loF);
+    const hiPct = factorToPct(hiF);
 
-    line.style.left = `${boundedPct}%`;
-    lab.style.left = `${boundedPct}%`;
-    lab.textContent = `${label}: ${bpm} bpm`;
+    const fill = document.getElementById(`${prefix}Fill`);
+    const loLine = document.getElementById(`${prefix}LoLine`);
+    const hiLine = document.getElementById(`${prefix}HiLine`);
+    const lab = document.getElementById(`${prefix}BandLabel`);
+
+    fill.style.left = `${Math.min(loPct, hiPct)}%`;
+    fill.style.width = `${Math.abs(hiPct - loPct)}%`;
+
+    loLine.style.left = `${loPct}%`;
+    hiLine.style.left = `${hiPct}%`;
+
+    const loBpm = roundBpm(karvonen(hfMax, ruhe, loF));
+    const hiBpm = roundBpm(karvonen(hfMax, ruhe, hiF));
+    const midPct = (loPct + hiPct) / 2;
+
+    lab.style.left = `${midPct}%`;
+    lab.textContent = `${label}: ${loBpm}–${hiBpm} bpm`;
+  }
+
+  function renderCompare(hfMax, ruhe){
+    const tbody = document.getElementById("compareBody");
+    tbody.innerHTML = "";
+    for (const z of ZONES){
+      const hrrLo = roundBpm(karvonen(hfMax, ruhe, z.lo));
+      const hrrHi = roundBpm(karvonen(hfMax, ruhe, z.hi));
+      const pmLo = roundBpm(percentMax(hfMax, z.lo));
+      const pmHi = roundBpm(percentMax(hfMax, z.hi));
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${z.name}</strong></td>
+        <td>${hrrLo}–${hrrHi}</td>
+        <td>${pmLo}–${pmHi}</td>
+      `;
+      tbody.appendChild(tr);
+    }
   }
 
   function calculate(){
@@ -641,8 +744,10 @@
     const hfMaxIn = clampNumber(parseInt(document.getElementById("hfMax").value, 10), 80, 260);
     const ruheIn = clampNumber(parseInt(document.getElementById("ruhepuls").value, 10), 30, 120);
 
-    const lt1In = parseFloat(document.getElementById("lt1").value);
-    const lt2In = parseFloat(document.getElementById("lt2").value);
+    const lt1Lo = parseFloat(document.getElementById("lt1Lo").value);
+    const lt1Hi = parseFloat(document.getElementById("lt1Hi").value);
+    const lt2Lo = parseFloat(document.getElementById("lt2Lo").value);
+    const lt2Hi = parseFloat(document.getElementById("lt2Hi").value);
 
     if (hfMaxIn === null || ruheIn === null){
       setBadge(false, "Bitte Werte eingeben");
@@ -652,20 +757,28 @@
       setBadge(false, "Ruhepuls muss < HFmax sein");
       return;
     }
-    if (Number.isNaN(lt1In) || Number.isNaN(lt2In)){
-      setBadge(false, "LT1/LT2 ungültig");
+    if ([lt1Lo, lt1Hi, lt2Lo, lt2Hi].some(Number.isNaN)){
+      setBadge(false, "LT-Bänder ungültig");
       return;
     }
-    if (lt1In >= lt2In){
-      setBadge(false, "LT1 muss < LT2 sein");
+    if (lt1Lo >= lt1Hi){
+      setBadge(false, "LT1: Untergrenze < Obergrenze");
       return;
     }
-    if (lt1In < 0.50 || lt1In > 0.95){
+    if (lt2Lo >= lt2Hi){
+      setBadge(false, "LT2: Untergrenze < Obergrenze");
+      return;
+    }
+    if (!(lt1Lo >= 0.50 && lt1Hi <= 0.95)){
       setBadge(false, "LT1 außerhalb 0,50–0,95");
       return;
     }
-    if (lt2In < 0.60 || lt2In > 1.00){
+    if (!(lt2Lo >= 0.60 && lt2Hi <= 1.00)){
       setBadge(false, "LT2 außerhalb 0,60–1,00");
+      return;
+    }
+    if (lt1Hi >= lt2Lo){
+      setBadge(false, "LT1 muss unter LT2 liegen (LT1_hi < LT2_lo)");
       return;
     }
 
@@ -673,23 +786,32 @@
     document.getElementById("hfMaxOut").textContent = hfMaxIn;
     document.getElementById("ruhepulsOut").textContent = ruheIn;
 
-    const lt1Bpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt1In));
-    const lt2Bpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt2In));
-    document.getElementById("lt1Out").textContent = `${lt1Bpm} bpm (${String(lt1In).replace(".", ",")})`;
-    document.getElementById("lt2Out").textContent = `${lt2Bpm} bpm (${String(lt2In).replace(".", ",")})`;
+    const lt1LoBpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt1Lo));
+    const lt1HiBpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt1Hi));
+    const lt2LoBpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt2Lo));
+    const lt2HiBpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt2Hi));
 
-    renderZones(hfMaxIn, ruheIn, lt1In, lt2In);
-
-    buildScaleSegments();
-    placeMarker("lt1Line", "lt1Label", lt1In, ruheIn, hfMaxIn, "LT1");
-    placeMarker("lt2Line", "lt2Label", lt2In, ruheIn, hfMaxIn, "LT2");
+    document.getElementById("lt1Out").textContent =
+      `${lt1LoBpm}–${lt1HiBpm} bpm (${String(lt1Lo).replace(".", ",")}–${String(lt1Hi).replace(".", ",")})`;
+    document.getElementById("lt2Out").textContent =
+      `${lt2LoBpm}–${lt2HiBpm} bpm (${String(lt2Lo).replace(".", ",")}–${String(lt2Hi).replace(".", ",")})`;
 
     const hrr = hfMaxIn - ruheIn;
     document.getElementById("scaleMeta").textContent = `HRR = ${hrr} bpm · Bereich visualisiert: 50–100% HRR`;
+    document.getElementById("methodLine").textContent =
+      "Berechnung: Karvonen/HRR (HF = Ruhe + (HFmax − Ruhe) × Faktor)";
+
+    renderZones(hfMaxIn, ruheIn, lt1Lo, lt1Hi, lt2Lo, lt2Hi);
+    buildScaleSegments();
+    placeBand("lt1", lt1Lo, lt1Hi, ruheIn, hfMaxIn, "LT1");
+    placeBand("lt2", lt2Lo, lt2Hi, ruheIn, hfMaxIn, "LT2");
+
+    renderCompare(hfMaxIn, ruheIn);
 
     setBadge(true, "berechnet");
   }
 
+  // Better PDF: smaller canvas + JPEG + compression + stable layout
   async function exportPdf(){
     const area = document.getElementById("exportArea");
     setBadge(true, "PDF wird erzeugt…");
@@ -701,34 +823,62 @@
       return;
     }
 
+    document.body.classList.add("exporting");
+
+    // Allow layout to settle
+    await new Promise(r => setTimeout(r, 80));
+
+    // Choose a sane scale: enough for sharp text, not insane file size
+    const scale = Math.min(1.5, Math.max(1.1, window.devicePixelRatio || 1));
+
     const canvas = await window.html2canvas(area, {
-      scale: 2,
+      scale,
       backgroundColor: "#ffffff",
-      useCORS: true
+      useCORS: true,
+      removeContainer: true
     });
 
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
+    // JPEG is much smaller than PNG for screenshots
+    const jpegQuality = 0.86;
+    const imgData = canvas.toDataURL("image/jpeg", jpegQuality);
+
+    const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
 
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 10;
 
-    const imgW = pageW;
-    const imgH = canvas.height * imgW / canvas.width;
+    const imgW = pageW - margin * 2;
+    const imgH = (canvas.height * imgW) / canvas.width;
 
-    let y = 10;
-    if (imgH <= pageH - 20){
-      pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+    // If it fits on one page: great.
+    if (imgH <= pageH - margin * 2){
+      pdf.addImage(imgData, "JPEG", margin, margin, imgW, imgH);
     } else {
-      let remaining = imgH;
-      let offsetY = 0;
+      // Slice into pages for correct multi-page output
+      const pxPerMm = canvas.width / imgW;
+      const pageInnerH = pageH - margin * 2;
+      const slicePxH = Math.floor(pageInnerH * pxPerMm);
 
-      while (remaining > 0){
-        pdf.addImage(imgData, "PNG", 0, y - offsetY, imgW, imgH);
-        remaining -= (pageH - 20);
-        offsetY += (pageH - 20);
+      let yPx = 0;
+      let pageIndex = 0;
 
-        if (remaining > 0) pdf.addPage();
+      while (yPx < canvas.height){
+        const sliceCanvas = document.createElement("canvas");
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = Math.min(slicePxH, canvas.height - yPx);
+
+        const ctx = sliceCanvas.getContext("2d");
+        ctx.drawImage(canvas, 0, yPx, canvas.width, sliceCanvas.height, 0, 0, canvas.width, sliceCanvas.height);
+
+        const sliceData = sliceCanvas.toDataURL("image/jpeg", jpegQuality);
+
+        if (pageIndex > 0) pdf.addPage();
+        const sliceH_mm = sliceCanvas.height / pxPerMm;
+        pdf.addImage(sliceData, "JPEG", margin, margin, imgW, sliceH_mm);
+
+        yPx += slicePxH;
+        pageIndex += 1;
       }
     }
 
@@ -736,7 +886,9 @@
     const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}`;
     const safeName = (document.getElementById("personName").value || "").trim().replace(/[^\w\-äöüÄÖÜß ]/g, "");
     const namePart = safeName ? `_${safeName.replace(/\s+/g, "_")}` : "";
-    pdf.save(`RVSH_Trainingszonen_LT${namePart}_${stamp}.pdf`);
+    pdf.save(`RVSH_Trainingszonen_LT_Band${namePart}_${stamp}.pdf`);
+
+    document.body.classList.remove("exporting");
     setBadge(true, "PDF gespeichert");
   }
 
@@ -744,17 +896,11 @@
   document.getElementById("pdfBtn").addEventListener("click", exportPdf);
   document.getElementById("printBtn").addEventListener("click", () => window.print());
 
-  // Live update on input changes (nice for LT fine-tuning)
-  ["personName","hfMax","ruhepuls","lt1","lt2"].forEach(id => {
-    document.getElementById(id).addEventListener("input", () => {
-      // only recalc when values are plausibly present
-      calculate();
-    });
+  ["personName","hfMax","ruhepuls","lt1Lo","lt1Hi","lt2Lo","lt2Hi"].forEach(id => {
+    document.getElementById(id).addEventListener("input", calculate);
   });
 
   // Initial
-  document.getElementById("lt1").value = DEFAULT_LT1;
-  document.getElementById("lt2").value = DEFAULT_LT2;
   calculate();
 </script>
 </body>
