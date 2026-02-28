@@ -5,18 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RVSH Trainingszonenrechner</title>
 
-  <!-- Typo: nah an gängigen Vereins-/Verbands-Websites (system + optional Google Font) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- PDF Export (Client-Side) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
 
   <style>
     :root{
-      /* Farbwelt: blau-weiß, passend zum Auftritt und Header-Logo auf rish.de */
       --rvsh-blue: #0b63a7;
       --rvsh-blue-dark: #084b7f;
       --rvsh-bg: #f4f7fb;
@@ -26,6 +23,13 @@
       --rvsh-card: #ffffff;
       --rvsh-good: #0f7b2d;
       --rvsh-warn: #b45309;
+
+      /* Zone colors */
+      --z1: #2e7d32; /* green */
+      --z2: #66bb6a; /* light green */
+      --z3: #f9a825; /* yellow */
+      --z4: #fb8c00; /* orange */
+      --z5: #e53935; /* red */
     }
 
     *{ box-sizing:border-box; }
@@ -129,7 +133,7 @@
       margin: 10px 0 6px 0;
     }
 
-    input{
+    input, select{
       width:100%;
       padding: 10px 12px;
       border-radius: 10px;
@@ -139,7 +143,7 @@
       background:white;
     }
 
-    input:focus{
+    input:focus, select:focus{
       border-color: rgba(11,99,167,.6);
       box-shadow: 0 0 0 3px rgba(11,99,167,.15);
     }
@@ -225,9 +229,40 @@
     }
 
     .zone{
-      font-weight: 700;
+      font-weight: 800;
       color: var(--rvsh-blue-dark);
     }
+
+    /* Zone row styling */
+    tr.zone-row{
+      position: relative;
+    }
+    tr.zone-row td:first-child{
+      position: relative;
+      padding-left: 18px;
+    }
+    tr.zone-row td:first-child::before{
+      content:"";
+      position:absolute;
+      left: 8px;
+      top: 10px;
+      bottom: 10px;
+      width: 6px;
+      border-radius: 6px;
+      background: var(--rvsh-border);
+    }
+
+    tr.z1{ background: rgba(46,125,50,.08); }
+    tr.z2{ background: rgba(102,187,106,.10); }
+    tr.z3{ background: rgba(249,168,37,.12); }
+    tr.z4{ background: rgba(251,140,0,.12); }
+    tr.z5{ background: rgba(229,57,53,.10); }
+
+    tr.z1 td:first-child::before{ background: var(--z1); }
+    tr.z2 td:first-child::before{ background: var(--z2); }
+    tr.z3 td:first-child::before{ background: var(--z3); }
+    tr.z4 td:first-child::before{ background: var(--z4); }
+    tr.z5 td:first-child::before{ background: var(--z5); }
 
     .factors{
       font-size: 12px;
@@ -244,7 +279,6 @@
       line-height: 1.4;
     }
 
-    /* Druck / PDF (Browser "Drucken" → "Als PDF speichern") */
     @media print{
       body{ background:white; }
       header{ print-color-adjust: exact; -webkit-print-color-adjust: exact; }
@@ -252,6 +286,10 @@
       main{ margin: 10px auto; }
       .card{ box-shadow:none; }
       table th{ background:#f2f6fb !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      tr.z1, tr.z2, tr.z3, tr.z4, tr.z5{
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
     }
   </style>
 </head>
@@ -259,7 +297,6 @@
   <header>
     <div class="header-inner">
       <div class="brand">
-        <!-- Header-Logo-Datei wird auf rish.de genutzt -->
         <img
           src="https://www.rish.de/images/rish-header-logo.png"
           alt="RVSH / rish.de"
@@ -267,7 +304,7 @@
         />
         <div style="min-width:0;">
           <h1>Trainingszonenrechner</h1>
-          <p>Ruderverband Schleswig-Holstein (RVSH) – Herzfrequenz-Zonen nach Karvonen</p>
+          <p>Ruderverband Schleswig-Holstein (RVSH) – Herzfrequenz-Zonen</p>
         </div>
       </div>
     </div>
@@ -278,11 +315,20 @@
       <section class="card no-print" aria-label="Eingaben">
         <h2>Eingaben</h2>
         <div class="content">
+          <label for="personName">Name</label>
+          <input id="personName" type="text" maxlength="80" placeholder="z. B. Max Mustermann" value="" />
+
           <label for="hfMax">Herzfrequenz MAX (HFmax) – 1/min</label>
           <input id="hfMax" type="number" min="80" max="260" step="1" value="170" />
 
           <label for="ruhepuls">Ruhepuls – 1/min</label>
           <input id="ruhepuls" type="number" min="30" max="120" step="1" value="52" />
+
+          <label for="calcMode">Berechnung</label>
+          <select id="calcMode">
+            <option value="karvonen" selected>Karvonen (HRR) = (HFmax − Ruhepuls) × Faktor + Ruhepuls</option>
+            <option value="percentMax">%HFmax = HFmax × Faktor</option>
+          </select>
 
           <div class="row">
             <button class="btn primary" id="calcBtn" type="button">Berechnen</button>
@@ -291,9 +337,8 @@
           </div>
 
           <div class="hint">
-            <strong>Formel (wie im RVSH-Rechner):</strong><br/>
-            (HFmax − Ruhepuls) × Trainingsfaktor + Ruhepuls<br/>
-            Tipp: Für das PDF funktioniert auch „Drucken“ → „Als PDF speichern“.
+            <strong>Wichtig:</strong> Viele verwechseln Zonen nach <em>Karvonen (HRR)</em> mit <em>%HFmax</em>.
+            Wenn eure Faktoren aus dem RVSH-Excel kommen und Ruhepuls berücksichtigt werden soll, ist <strong>Karvonen</strong> korrekt.
           </div>
         </div>
       </section>
@@ -304,12 +349,19 @@
           <div class="result-header">
             <div>
               <div style="font-weight:700; font-size:16px;">Herzfrequenz-Trainingsbereiche (bpm)</div>
-              <div class="factors">Zonen und Faktoren gemäß Excel: Z1 0,55–0,70 · Z2 0,70–0,85 · Z3 0,85–1,00 · Z4 1,00–1,15 · Z5 1,15–1,45</div>
+              <div class="factors" id="factorsText">
+                Zonen-Faktoren: Z1 0,55–0,70 · Z2 0,70–0,85 · Z3 0,85–1,00 · Z4 1,00–1,15 · Z5 1,15–1,45
+              </div>
+              <div class="factors" id="modeText">Berechnung: Karvonen (HRR)</div>
             </div>
             <div class="badge" id="statusBadge">bereit</div>
           </div>
 
           <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="padding:10px 12px; border:1px solid var(--rvsh-border); border-radius:12px; min-width: 180px;">
+              <div style="font-size:12px; color:var(--rvsh-muted);">Name</div>
+              <div style="font-weight:800; font-size:18px;" id="nameOut">–</div>
+            </div>
             <div style="padding:10px 12px; border:1px solid var(--rvsh-border); border-radius:12px;">
               <div style="font-size:12px; color:var(--rvsh-muted);">HFmax</div>
               <div style="font-weight:800; font-size:18px;" id="hfMaxOut">170</div>
@@ -337,7 +389,7 @@
           </div>
 
           <div class="hint" style="margin-top:10px;">
-            Stand: 2026 · Quelle der Faktoren/Formel: RVSH Excel „Trainingszonenrechner“.
+            Stand: 2026 · Quelle der Faktoren/Formel: RVSH Excel „Trainingszonenrechner“ (nachgebildet).
           </div>
         </div>
       </section>
@@ -346,18 +398,18 @@
 
   <footer>
     <div>
-      Logo/Branding: Das Header-Logo wird von rish.de eingebunden. Für eine vollständige CI/CD-konforme Umsetzung (Farbcodes, Typo, Abstände, Logo-Varianten) bitte die RVSH-Gestaltungsvorgaben bzw. die Website als Referenz nutzen.
+      Logo/Branding: Das Header-Logo wird von rish.de eingebunden. Für eine CI-konforme Umsetzung bitte die RVSH-Gestaltungsvorgaben nutzen.
     </div>
   </footer>
 
 <script>
   // Faktoren aus der Excel-Datei (Trainingszonenrechner RVSH)
   const ZONES = [
-    { name: "Zone 1", lo: 0.55, hi: 0.70 },
-    { name: "Zone 2", lo: 0.70, hi: 0.85 },
-    { name: "Zone 3", lo: 0.85, hi: 1.00 },
-    { name: "Zone 4", lo: 1.00, hi: 1.15 },
-    { name: "Zone 5", lo: 1.15, hi: 1.45 },
+    { name: "Zone 1", lo: 0.55, hi: 0.70, css: "z1" },
+    { name: "Zone 2", lo: 0.70, hi: 0.85, css: "z2" },
+    { name: "Zone 3", lo: 0.85, hi: 1.00, css: "z3" },
+    { name: "Zone 4", lo: 1.00, hi: 1.15, css: "z4" },
+    { name: "Zone 5", lo: 1.15, hi: 1.45, css: "z5" },
   ];
 
   function clampNumber(n, min, max){
@@ -365,8 +417,14 @@
     return Math.min(max, Math.max(min, n));
   }
 
+  // Karvonen / HRR
   function karvonen(hfMax, ruhe, factor){
     return (hfMax - ruhe) * factor + ruhe;
+  }
+
+  // % of HFmax (no resting pulse involved)
+  function percentMax(hfMax, factor){
+    return hfMax * factor;
   }
 
   function roundBpm(x){
@@ -387,22 +445,27 @@
     }
   }
 
-  function renderZones(hfMax, ruhe){
+  function formatFactorRange(lo, hi){
+    return `${String(lo).replace(".", ",")} – ${String(hi).replace(".", ",")}`;
+  }
+
+  function renderZones(hfMax, ruhe, mode){
     const tbody = document.getElementById("zonesBody");
     tbody.innerHTML = "";
 
     for (const z of ZONES){
-      const lo = roundBpm(karvonen(hfMax, ruhe, z.lo));
-      const hi = roundBpm(karvonen(hfMax, ruhe, z.hi));
+      const lo = roundBpm(mode === "karvonen" ? karvonen(hfMax, ruhe, z.lo) : percentMax(hfMax, z.lo));
+      const hi = roundBpm(mode === "karvonen" ? karvonen(hfMax, ruhe, z.hi) : percentMax(hfMax, z.hi));
 
       const tr = document.createElement("tr");
+      tr.className = `zone-row ${z.css}`;
 
       const tdZone = document.createElement("td");
       tdZone.innerHTML = `<span class="zone">${z.name}</span>`;
       tr.appendChild(tdZone);
 
       const tdFac = document.createElement("td");
-      tdFac.textContent = `${String(z.lo).replace(".", ",")} – ${String(z.hi).replace(".", ",")}`;
+      tdFac.textContent = formatFactorRange(z.lo, z.hi);
       tr.appendChild(tdFac);
 
       const tdLo = document.createElement("td");
@@ -418,31 +481,37 @@
   }
 
   function calculate(){
+    const nameIn = (document.getElementById("personName").value || "").trim();
     const hfMaxIn = clampNumber(parseInt(document.getElementById("hfMax").value, 10), 80, 260);
     const ruheIn = clampNumber(parseInt(document.getElementById("ruhepuls").value, 10), 30, 120);
+    const mode = document.getElementById("calcMode").value;
 
     if (hfMaxIn === null || ruheIn === null){
       setBadge(false, "Bitte Werte eingeben");
       return;
     }
-    if (ruheIn >= hfMaxIn){
+    if (ruheIn >= hfMaxIn && mode === "karvonen"){
       setBadge(false, "Ruhepuls muss < HFmax sein");
       return;
     }
 
+    document.getElementById("nameOut").textContent = nameIn.length ? nameIn : "–";
     document.getElementById("hfMaxOut").textContent = hfMaxIn;
     document.getElementById("ruhepulsOut").textContent = ruheIn;
 
-    renderZones(hfMaxIn, ruheIn);
+    document.getElementById("modeText").textContent =
+      mode === "karvonen"
+        ? "Berechnung: Karvonen (HRR) = (HFmax − Ruhepuls) × Faktor + Ruhepuls"
+        : "Berechnung: %HFmax = HFmax × Faktor";
+
+    renderZones(hfMaxIn, ruheIn, mode);
     setBadge(true, "berechnet");
   }
 
   async function exportPdf(){
-    // Sauberer Export des Ergebnis-Bereichs (ohne Eingabe-Card)
     const area = document.getElementById("exportArea");
     setBadge(true, "PDF wird erzeugt…");
 
-    // Warten, bis Libraries geladen sind
     const { jsPDF } = window.jspdf || {};
     if (!jsPDF || !window.html2canvas){
       setBadge(false, "PDF-Libs nicht geladen");
@@ -462,7 +531,6 @@
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
 
-    // Bild ins A4 einpassen
     const imgW = pageW;
     const imgH = canvas.height * imgW / canvas.width;
 
@@ -470,7 +538,6 @@
     if (imgH <= pageH - 20){
       pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
     } else {
-      // Falls zu lang: auf mehrere Seiten schneiden
       let remaining = imgH;
       let offsetY = 0;
 
@@ -485,13 +552,18 @@
 
     const now = new Date();
     const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}`;
-    pdf.save(`RVSH_Trainingszonen_${stamp}.pdf`);
+    const safeName = (document.getElementById("personName").value || "").trim().replace(/[^\w\-äöüÄÖÜß ]/g, "");
+    const namePart = safeName ? `_${safeName.replace(/\s+/g, "_")}` : "";
+    pdf.save(`RVSH_Trainingszonen${namePart}_${stamp}.pdf`);
     setBadge(true, "PDF gespeichert");
   }
 
   document.getElementById("calcBtn").addEventListener("click", calculate);
   document.getElementById("pdfBtn").addEventListener("click", exportPdf);
   document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+  // Recalculate live when changing mode (optional but nice)
+  document.getElementById("calcMode").addEventListener("change", calculate);
 
   // Initial
   calculate();
