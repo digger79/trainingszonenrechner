@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RVSH Trainingszonenrechner</title>
+
+  <!-- Typo: nah an gängigen Vereins-/Verbands-Websites (system + optional Google Font) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- PDF Export (Client-Side) -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+
+  <style>
+    :root{
+      /* Farbwelt: blau-weiß, passend zum Auftritt und Header-Logo auf rish.de */
+      --rvsh-blue: #0b63a7;
+      --rvsh-blue-dark: #084b7f;
+      --rvsh-bg: #f4f7fb;
+      --rvsh-text: #15202b;
+      --rvsh-muted: #5b6b7a;
+      --rvsh-border: #d9e2ef;
+      --rvsh-card: #ffffff;
+      --rvsh-good: #0f7b2d;
+      --rvsh-warn: #b45309;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:"Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--rvsh-text);
+      background:linear-gradient(180deg, #ffffff 0%, var(--rvsh-bg) 100%);
+    }
+
+    header{
+      background:linear-gradient(90deg, var(--rvsh-blue-dark), var(--rvsh-blue));
+      color:white;
+      padding:18px 16px;
+      border-bottom: 4px solid rgba(255,255,255,.15);
+    }
+
+    .header-inner{
+      max-width: 980px;
+      margin: 0 auto;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 0;
+    }
+
+    .brand img{
+      height:44px;
+      width:auto;
+      background:white;
+      padding:6px 10px;
+      border-radius:10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.18);
+    }
+
+    .brand h1{
+      margin:0;
+      font-size: 18px;
+      line-height:1.2;
+      font-weight:700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .brand p{
+      margin:2px 0 0 0;
+      font-size: 13px;
+      opacity:.9;
+    }
+
+    main{
+      max-width: 980px;
+      margin: 18px auto 36px auto;
+      padding: 0 16px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 900px){
+      .grid{
+        grid-template-columns: 340px 1fr;
+        align-items:start;
+      }
+    }
+
+    .card{
+      background:var(--rvsh-card);
+      border:1px solid var(--rvsh-border);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(11, 99, 167, .08);
+      overflow:hidden;
+    }
+
+    .card h2{
+      margin:0;
+      padding: 14px 16px;
+      font-size: 15px;
+      border-bottom:1px solid var(--rvsh-border);
+      background: #fbfdff;
+    }
+
+    .card .content{
+      padding: 14px 16px 16px 16px;
+    }
+
+    label{
+      display:block;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 10px 0 6px 0;
+    }
+
+    input{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border:1px solid var(--rvsh-border);
+      font-size: 15px;
+      outline:none;
+      background:white;
+    }
+
+    input:focus{
+      border-color: rgba(11,99,167,.6);
+      box-shadow: 0 0 0 3px rgba(11,99,167,.15);
+    }
+
+    .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--rvsh-muted);
+      line-height: 1.35;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+
+    .btn{
+      border:0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight:700;
+      cursor:pointer;
+      font-size: 14px;
+      flex: 1 1 150px;
+      min-height: 42px;
+    }
+
+    .btn.primary{
+      background: var(--rvsh-blue);
+      color:white;
+    }
+
+    .btn.primary:hover{ background: #095892; }
+
+    .btn.ghost{
+      background: #eef5ff;
+      color: var(--rvsh-blue-dark);
+      border: 1px solid rgba(11,99,167,.25);
+    }
+
+    .btn.ghost:hover{ background:#e2efff; }
+
+    .result-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .badge{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(15,123,45,.10);
+      color: var(--rvsh-good);
+      border: 1px solid rgba(15,123,45,.20);
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    th, td{
+      text-align:left;
+      padding: 10px 10px;
+      border-bottom: 1px solid var(--rvsh-border);
+      vertical-align: middle;
+    }
+
+    th{
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      color: var(--rvsh-muted);
+      background: #fbfdff;
+    }
+
+    .zone{
+      font-weight: 700;
+      color: var(--rvsh-blue-dark);
+    }
+
+    .factors{
+      font-size: 12px;
+      color: var(--rvsh-muted);
+      margin-top: 6px;
+    }
+
+    footer{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 16px 26px 16px;
+      color: var(--rvsh-muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Druck / PDF (Browser "Drucken" → "Als PDF speichern") */
+    @media print{
+      body{ background:white; }
+      header{ print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .no-print{ display:none !important; }
+      main{ margin: 10px auto; }
+      .card{ box-shadow:none; }
+      table th{ background:#f2f6fb !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <!-- Header-Logo-Datei wird auf rish.de genutzt -->
+        <img
+          src="https://www.rish.de/images/rish-header-logo.png"
+          alt="RVSH / rish.de"
+          referrerpolicy="no-referrer"
+        />
+        <div style="min-width:0;">
+          <h1>Trainingszonenrechner</h1>
+          <p>Ruderverband Schleswig-Holstein (RVSH) – Herzfrequenz-Zonen nach Karvonen</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card no-print" aria-label="Eingaben">
+        <h2>Eingaben</h2>
+        <div class="content">
+          <label for="hfMax">Herzfrequenz MAX (HFmax) – 1/min</label>
+          <input id="hfMax" type="number" min="80" max="260" step="1" value="170" />
+
+          <label for="ruhepuls">Ruhepuls – 1/min</label>
+          <input id="ruhepuls" type="number" min="30" max="120" step="1" value="52" />
+
+          <div class="row">
+            <button class="btn primary" id="calcBtn" type="button">Berechnen</button>
+            <button class="btn ghost" id="pdfBtn" type="button">Als PDF herunterladen</button>
+            <button class="btn ghost" id="printBtn" type="button">Drucken</button>
+          </div>
+
+          <div class="hint">
+            <strong>Formel (wie im RVSH-Rechner):</strong><br/>
+            (HFmax − Ruhepuls) × Trainingsfaktor + Ruhepuls<br/>
+            Tipp: Für das PDF funktioniert auch „Drucken“ → „Als PDF speichern“.
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="exportArea" aria-label="Ergebnisse">
+        <h2>Ergebnisse</h2>
+        <div class="content">
+          <div class="result-header">
+            <div>
+              <div style="font-weight:700; font-size:16px;">Herzfrequenz-Trainingsbereiche (bpm)</div>
+              <div class="factors">Zonen und Faktoren gemäß Excel: Z1 0,55–0,70 · Z2 0,70–0,85 · Z3 0,85–1,00 · Z4 1,00–1,15 · Z5 1,15–1,45</div>
+            </div>
+            <div class="badge" id="statusBadge">bereit</div>
+          </div>
+
+          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="padding:10px 12px; border:1px solid var(--rvsh-border); border-radius:12px;">
+              <div style="font-size:12px; color:var(--rvsh-muted);">HFmax</div>
+              <div style="font-weight:800; font-size:18px;" id="hfMaxOut">170</div>
+            </div>
+            <div style="padding:10px 12px; border:1px solid var(--rvsh-border); border-radius:12px;">
+              <div style="font-size:12px; color:var(--rvsh-muted);">Ruhepuls</div>
+              <div style="font-weight:800; font-size:18px;" id="ruhepulsOut">52</div>
+            </div>
+          </div>
+
+          <table aria-label="Zonentabelle">
+            <thead>
+              <tr>
+                <th style="width: 18%;">Zone</th>
+                <th style="width: 22%;">Faktor</th>
+                <th style="width: 30%;">von (bpm)</th>
+                <th style="width: 30%;">bis (bpm)</th>
+              </tr>
+            </thead>
+            <tbody id="zonesBody"></tbody>
+          </table>
+
+          <div class="hint" style="margin-top:12px;">
+            Hinweis: Werte werden kaufmännisch auf ganze bpm gerundet.
+          </div>
+
+          <div class="hint" style="margin-top:10px;">
+            Stand: 2026 · Quelle der Faktoren/Formel: RVSH Excel „Trainingszonenrechner“.
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div>
+      Logo/Branding: Das Header-Logo wird von rish.de eingebunden. Für eine vollständige CI/CD-konforme Umsetzung (Farbcodes, Typo, Abstände, Logo-Varianten) bitte die RVSH-Gestaltungsvorgaben bzw. die Website als Referenz nutzen.
+    </div>
+  </footer>
+
+<script>
+  // Faktoren aus der Excel-Datei (Trainingszonenrechner RVSH)
+  const ZONES = [
+    { name: "Zone 1", lo: 0.55, hi: 0.70 },
+    { name: "Zone 2", lo: 0.70, hi: 0.85 },
+    { name: "Zone 3", lo: 0.85, hi: 1.00 },
+    { name: "Zone 4", lo: 1.00, hi: 1.15 },
+    { name: "Zone 5", lo: 1.15, hi: 1.45 },
+  ];
+
+  function clampNumber(n, min, max){
+    if (Number.isNaN(n)) return null;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function karvonen(hfMax, ruhe, factor){
+    return (hfMax - ruhe) * factor + ruhe;
+  }
+
+  function roundBpm(x){
+    return Math.round(x);
+  }
+
+  function setBadge(ok, text){
+    const b = document.getElementById("statusBadge");
+    b.textContent = text;
+    if (ok){
+      b.style.background = "rgba(15,123,45,.10)";
+      b.style.borderColor = "rgba(15,123,45,.20)";
+      b.style.color = "var(--rvsh-good)";
+    } else {
+      b.style.background = "rgba(180,83,9,.10)";
+      b.style.borderColor = "rgba(180,83,9,.20)";
+      b.style.color = "var(--rvsh-warn)";
+    }
+  }
+
+  function renderZones(hfMax, ruhe){
+    const tbody = document.getElementById("zonesBody");
+    tbody.innerHTML = "";
+
+    for (const z of ZONES){
+      const lo = roundBpm(karvonen(hfMax, ruhe, z.lo));
+      const hi = roundBpm(karvonen(hfMax, ruhe, z.hi));
+
+      const tr = document.createElement("tr");
+
+      const tdZone = document.createElement("td");
+      tdZone.innerHTML = `<span class="zone">${z.name}</span>`;
+      tr.appendChild(tdZone);
+
+      const tdFac = document.createElement("td");
+      tdFac.textContent = `${String(z.lo).replace(".", ",")} – ${String(z.hi).replace(".", ",")}`;
+      tr.appendChild(tdFac);
+
+      const tdLo = document.createElement("td");
+      tdLo.textContent = lo;
+      tr.appendChild(tdLo);
+
+      const tdHi = document.createElement("td");
+      tdHi.textContent = hi;
+      tr.appendChild(tdHi);
+
+      tbody.appendChild(tr);
+    }
+  }
+
+  function calculate(){
+    const hfMaxIn = clampNumber(parseInt(document.getElementById("hfMax").value, 10), 80, 260);
+    const ruheIn = clampNumber(parseInt(document.getElementById("ruhepuls").value, 10), 30, 120);
+
+    if (hfMaxIn === null || ruheIn === null){
+      setBadge(false, "Bitte Werte eingeben");
+      return;
+    }
+    if (ruheIn >= hfMaxIn){
+      setBadge(false, "Ruhepuls muss < HFmax sein");
+      return;
+    }
+
+    document.getElementById("hfMaxOut").textContent = hfMaxIn;
+    document.getElementById("ruhepulsOut").textContent = ruheIn;
+
+    renderZones(hfMaxIn, ruheIn);
+    setBadge(true, "berechnet");
+  }
+
+  async function exportPdf(){
+    // Sauberer Export des Ergebnis-Bereichs (ohne Eingabe-Card)
+    const area = document.getElementById("exportArea");
+    setBadge(true, "PDF wird erzeugt…");
+
+    // Warten, bis Libraries geladen sind
+    const { jsPDF } = window.jspdf || {};
+    if (!jsPDF || !window.html2canvas){
+      setBadge(false, "PDF-Libs nicht geladen");
+      alert("PDF-Export konnte nicht geladen werden. Bitte Internetzugang prüfen oder alternativ über 'Drucken' als PDF speichern.");
+      return;
+    }
+
+    const canvas = await window.html2canvas(area, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      useCORS: true
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+
+    // Bild ins A4 einpassen
+    const imgW = pageW;
+    const imgH = canvas.height * imgW / canvas.width;
+
+    let y = 10;
+    if (imgH <= pageH - 20){
+      pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+    } else {
+      // Falls zu lang: auf mehrere Seiten schneiden
+      let remaining = imgH;
+      let offsetY = 0;
+
+      while (remaining > 0){
+        pdf.addImage(imgData, "PNG", 0, y - offsetY, imgW, imgH);
+        remaining -= (pageH - 20);
+        offsetY += (pageH - 20);
+
+        if (remaining > 0) pdf.addPage();
+      }
+    }
+
+    const now = new Date();
+    const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}`;
+    pdf.save(`RVSH_Trainingszonen_${stamp}.pdf`);
+    setBadge(true, "PDF gespeichert");
+  }
+
+  document.getElementById("calcBtn").addEventListener("click", calculate);
+  document.getElementById("pdfBtn").addEventListener("click", exportPdf);
+  document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+  // Initial
+  calculate();
+</script>
+</body>
+</html>
