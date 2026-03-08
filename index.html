@@ -1,829 +1,426 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RVSH Trainingszonenrechner</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap"
-    rel="stylesheet"
-  >
-
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
-
-  <style>
-    :root{
-      --blue: #1e73be;
-      --blue-dark: #155a93;
-      --bg: #f8f8f8;
-      --card: #ffffff;
-      --text: #333333;
-      --muted: #555555;
-      --border: #e6e6e6;
-
-      --z1: #dbeafe;
-      --z2: #bbf7d0;
-      --z3: #fde68a;
-      --z4: #fdba74;
-      --z5: #fca5a5;
-
-      --z1-accent: #2563eb;
-      --z2-accent: #15803d;
-      --z3-accent: #ca8a04;
-      --z4-accent: #ea580c;
-      --z5-accent: #dc2626;
-    }
-
-    *{ box-sizing: border-box; }
-
-    body{
-      margin: 0;
-      font-family: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.6;
-    }
-
-    a{ color: var(--blue); text-decoration: none; }
-    a:hover{ color: var(--blue-dark); text-decoration: underline; }
-
-    header{
-      background: #fff;
-      border-bottom: 3px solid var(--blue);
-    }
-
-    .container{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 16px;
-    }
-
-    .header-inner{
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 0;
-    }
-
-    .site-logo{
-      height: 44px;
-      width: auto;
-      display: block;
-    }
-
-    .site-title h1{
-      margin: 0;
-      font-size: 20px;
-      font-weight: 700;
-      color: #222;
-    }
-
-    .site-title p{
-      margin: 2px 0 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    main{
-      padding: 18px 0 30px;
-    }
-
-    .layout{
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-
-    @media (min-width: 920px){
-      .layout{
-        grid-template-columns: 320px 1fr;
-      }
-    }
-
-    .card{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .card h2{
-      margin: 0;
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #222;
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .card .content{
-      padding: 14px;
-    }
-
-    label{
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      margin: 10px 0 6px 0;
-      color: #222;
-    }
-
-    input{
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 15px;
-      outline: none;
-      background: #fff;
-    }
-
-    input:focus{
-      border-color: rgba(30,115,190,.6);
-      box-shadow: 0 0 0 3px rgba(30,115,190,.12);
-    }
-
-    .actions{
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .btn{
-      border: 1px solid var(--border);
-      background: #fff;
-      color: #222;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 14px;
-      flex: 1 1 140px;
-      min-height: 42px;
-    }
-
-    .btn.primary{
-      background: var(--blue);
-      border-color: var(--blue);
-      color: #fff;
-    }
-
-    .btn.primary:hover{
-      background: var(--blue-dark);
-      border-color: var(--blue-dark);
-    }
-
-    .hint{
-      margin-top: 10px;
-      font-size: 12.5px;
-      color: var(--muted);
-    }
-
-    .result-head{
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-
-    .badge{
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.08);
-      background: rgba(21,128,61,.10);
-      color: #166534;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .badge.warn{
-      background: rgba(234,88,12,.10);
-      color: #9a3412;
-    }
-
-    .meta{
-      margin-top: 6px;
-      font-size: 12.5px;
-      color: var(--muted);
-    }
-
-    .export-header{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding-bottom: 12px;
-      margin-bottom: 14px;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-
-    .export-brand{
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .export-brand img{
-      height: 42px;
-      width: auto;
-      display: block;
-    }
-
-    .export-brand-text{
-      min-width: 0;
-    }
-
-    .export-brand-text strong{
-      display: block;
-      font-size: 16px;
-      color: #222;
-    }
-
-    .export-brand-text span{
-      display: block;
-      font-size: 12.5px;
-      color: var(--muted);
-    }
-
-    .chips{
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
-    .chip{
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      min-width: 160px;
-      background: #fff;
-    }
-
-    .chip .k{
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .chip .v{
-      font-size: 20px;
-      font-weight: 800;
-      color: #222;
-      margin-top: 2px;
-    }
-
-    .zones-grid{
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    @media (min-width: 900px){
-      .zones-grid{
-        grid-template-columns: repeat(5, 1fr);
-      }
-    }
-
-    @media (min-width: 640px) and (max-width: 899px){
-      .zones-grid{
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .zone-box{
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #fff;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-    }
-
-    .zone-box .zone-top{
-      padding: 10px 12px;
-      font-weight: 800;
-      font-size: 14px;
-      color: #222;
-      border-bottom: 1px solid rgba(0,0,0,.06);
-    }
-
-    .zone-box.z1 .zone-top{ background: var(--z1); border-left: 6px solid var(--z1-accent); }
-    .zone-box.z2 .zone-top{ background: var(--z2); border-left: 6px solid var(--z2-accent); }
-    .zone-box.z3 .zone-top{ background: var(--z3); border-left: 6px solid var(--z3-accent); }
-    .zone-box.z4 .zone-top{ background: var(--z4); border-left: 6px solid var(--z4-accent); }
-    .zone-box.z5 .zone-top{ background: var(--z5); border-left: 6px solid var(--z5-accent); }
-
-    .zone-box .zone-mid{
-      padding: 14px 12px 10px 12px;
-      text-align: center;
-    }
-
-    .zone-range{
-      font-size: 26px;
-      font-weight: 800;
-      line-height: 1.1;
-      color: #111;
-    }
-
-    .zone-factor{
-      margin-top: 6px;
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .zone-goal{
-      padding: 0 12px 14px 12px;
-      font-size: 13px;
-      color: var(--text);
-      margin-top: auto;
-    }
-
-    .zone-goal strong{
-      display: block;
-      margin-bottom: 4px;
-      color: #222;
-    }
-
-    table{
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
-      font-size: 14px;
-    }
-
-    th, td{
-      text-align: left;
-      padding: 10px 10px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top;
-    }
-
-    th{
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .03em;
-      color: var(--muted);
-      background: #fafafa;
-    }
-
-    .zone-name{
-      font-weight: 800;
-      color: #222;
-    }
-
-    .range-strong{
-      font-weight: 800;
-      font-size: 15px;
-      color: #111;
-      white-space: nowrap;
-    }
-
-    details.info{
-      margin-top: 14px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #fafafa;
-      overflow: hidden;
-    }
-
-    details.info summary{
-      cursor: pointer;
-      padding: 12px 14px;
-      font-weight: 800;
-      color: var(--blue-dark);
-      list-style: none;
-    }
-
-    details.info summary::-webkit-details-marker{
-      display: none;
-    }
-
-    details.info .info-body{
-      padding: 0 14px 14px 14px;
-      font-size: 13px;
-      color: var(--text);
-    }
-
-    body.exporting header{
-      display: none;
-    }
-
-    body.exporting main{
-      padding: 0;
-    }
-
-    body.exporting .layout{
-      grid-template-columns: 1fr;
-    }
-
-    body.exporting .no-print{
-      display: none !important;
-    }
-
-    body.exporting #exportArea{
-      max-width: 190mm;
-      margin: 0 auto;
-    }
-
-    footer{
-      background: #3a3a3a;
-      color: #eaeaea;
-      padding: 18px 0;
-      margin-top: 10px;
-      font-size: 12.5px;
-    }
-
-    .foot{
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    @media print{
-      .no-print{ display: none !important; }
-      body{ background: #fff; }
-      header{ display: none; }
-      footer{ display: none; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>RVSH Trainingszonenrechner</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<style>
+
+:root{
+--blue:#1e73be;
+--text:#333;
+--bg:#f8f8f8;
+--border:#e5e5e5;
+
+--z1:#22c55e;
+--z2:#84cc16;
+--z3:#eab308;
+--z4:#f97316;
+--z5:#ef4444;
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:"Open Sans",system-ui,Arial;
+background:var(--bg);
+color:var(--text);
+}
+
+header{
+background:white;
+border-bottom:3px solid var(--blue);
+}
+
+.container{
+max-width:1100px;
+margin:auto;
+padding:16px;
+}
+
+.header-inner{
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.logo{
+height:50px;
+}
+
+h1{
+margin:0;
+font-size:22px;
+}
+
+.subtitle{
+font-size:13px;
+color:#666;
+}
+
+.layout{
+display:grid;
+grid-template-columns:1fr;
+gap:20px;
+margin-top:20px;
+}
+
+@media(min-width:900px){
+.layout{
+grid-template-columns:320px 1fr;
+}
+}
+
+.card{
+background:white;
+border:1px solid var(--border);
+border-radius:10px;
+}
+
+.card h2{
+margin:0;
+padding:12px 16px;
+border-bottom:1px solid var(--border);
+font-size:16px;
+}
+
+.card-content{
+padding:16px;
+}
+
+label{
+display:block;
+font-weight:600;
+margin-top:10px;
+font-size:13px;
+}
+
+input{
+width:100%;
+padding:10px;
+border-radius:6px;
+border:1px solid var(--border);
+font-size:15px;
+}
+
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+button{
+flex:1;
+padding:10px;
+border-radius:6px;
+border:1px solid var(--border);
+background:white;
+cursor:pointer;
+font-weight:600;
+}
+
+button.primary{
+background:var(--blue);
+color:white;
+border-color:var(--blue);
+}
+
+.result-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:16px;
+}
+
+.badge{
+font-size:12px;
+background:#e8f5e9;
+padding:5px 10px;
+border-radius:20px;
+}
+
+.chips{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+.chip{
+border:1px solid var(--border);
+border-radius:8px;
+padding:10px 14px;
+min-width:120px;
+}
+
+.chip-value{
+font-size:20px;
+font-weight:700;
+}
+
+.zones{
+display:grid;
+gap:12px;
+}
+
+@media(min-width:900px){
+.zones{
+grid-template-columns:repeat(5,1fr);
+}
+}
+
+.zone{
+border-radius:8px;
+overflow:hidden;
+border:1px solid var(--border);
+}
+
+.zone-title{
+color:white;
+padding:8px;
+font-weight:700;
+text-align:center;
+}
+
+.zone-values{
+font-size:22px;
+font-weight:700;
+text-align:center;
+padding:14px;
+background:#fafafa;
+}
+
+.zone-goal{
+padding:10px;
+font-size:13px;
+color:#555;
+text-align:center;
+}
+
+.z1 .zone-title{background:var(--z1)}
+.z2 .zone-title{background:var(--z2)}
+.z3 .zone-title{background:var(--z3)}
+.z4 .zone-title{background:var(--z4)}
+.z5 .zone-title{background:var(--z5)}
+
+footer{
+margin-top:30px;
+background:#3a3a3a;
+color:white;
+font-size:12px;
+padding:16px;
+text-align:center;
+}
+
+.export-header{
+display:flex;
+align-items:center;
+gap:12px;
+margin-bottom:16px;
+}
+
+.export-header img{
+height:45px;
+}
+
+@media print{
+header,.controls,footer{
+display:none;
+}
+}
+
+</style>
 </head>
 
 <body>
-  <header>
-    <div class="container">
-      <div class="header-inner">
-        <img
-          src="https://www.rish.de/images/rish-header-logo.png"
-          alt="RVSH"
-          class="site-logo"
-          referrerpolicy="no-referrer"
-        >
-        <div class="site-title">
-          <h1>Trainingszonenrechner</h1>
-          <p>Ruderverband Schleswig-Holstein (RVSH) · Karvonen / HRR</p>
-        </div>
-      </div>
-    </div>
-  </header>
 
-  <main>
-    <div class="container">
-      <div class="layout">
-        <section class="card no-print" aria-label="Eingaben">
-          <h2>Eingaben</h2>
-          <div class="content">
-            <label for="personName">Name</label>
-            <input id="personName" type="text" maxlength="80" placeholder="z. B. Max Mustermann" value="">
+<header>
+<div class="container header-inner">
+<img src="rish-header-logo.png" class="logo">
+<div>
+<h1>Trainingszonenrechner</h1>
+<div class="subtitle">Ruderverband Schleswig-Holstein</div>
+</div>
+</div>
+</header>
 
-            <label for="hfMax">Herzfrequenz MAX (HFmax) – 1/min</label>
-            <input id="hfMax" type="number" min="80" max="260" step="1" value="170">
+<main class="container">
 
-            <label for="ruhepuls">Ruhepuls – 1/min</label>
-            <input id="ruhepuls" type="number" min="30" max="120" step="1" value="52">
+<div class="layout">
 
-            <div class="actions">
-              <button class="btn primary" id="calcBtn" type="button">Berechnen</button>
-              <button class="btn" id="pdfBtn" type="button">PDF herunterladen</button>
-              <button class="btn" id="printBtn" type="button">Drucken</button>
-            </div>
+<div class="card controls">
+<h2>Eingaben</h2>
 
-            <div class="hint">
-              Formel: (HFmax − Ruhepuls) × Trainingsfaktor + Ruhepuls<br>
-              Zonen: 50–60% · 60–70% · 70–80% · 80–90% · 90–100%
-            </div>
-          </div>
-        </section>
+<div class="card-content">
 
-        <section class="card" id="exportArea" aria-label="Ergebnisse">
-          <h2>Ergebnisse</h2>
-          <div class="content">
-            <div class="export-header">
-              <div class="export-brand">
-                <img
-                  src="https://www.rish.de/images/rish-header-logo.png"
-                  alt="RVSH"
-                  referrerpolicy="no-referrer"
-                >
-                <div class="export-brand-text">
-                  <strong>Trainingszonenrechner</strong>
-                  <span>Ruderverband Schleswig-Holstein (RVSH)</span>
-                </div>
-              </div>
+<label>Name</label>
+<input id="name" type="text" placeholder="Name">
 
-              <div class="badge" id="statusBadge">bereit</div>
-            </div>
+<label>HFmax</label>
+<input id="hfmax" type="number" value="170">
 
-            <div class="result-head">
-              <div>
-                <div style="font-weight:800; font-size:16px; color:#222;">Herzfrequenz-Trainingsbereiche (bpm)</div>
-                <div class="meta">
-                  Die wichtigsten Werte sind unten direkt als große Bereiche von–bis hervorgehoben.
-                </div>
-              </div>
-            </div>
+<label>Ruhepuls</label>
+<input id="ruhe" type="number" value="52">
 
-            <div class="chips">
-              <div class="chip">
-                <div class="k">Name</div>
-                <div class="v" id="nameOut">–</div>
-              </div>
-              <div class="chip">
-                <div class="k">HFmax</div>
-                <div class="v" id="hfMaxOut">170</div>
-              </div>
-              <div class="chip">
-                <div class="k">Ruhepuls</div>
-                <div class="v" id="ruhepulsOut">52</div>
-              </div>
-            </div>
+<div class="actions">
 
-            <div class="zones-grid" id="zonesGrid"></div>
+<button class="primary" onclick="calculate()">Berechnen</button>
 
-            <table aria-label="Zonentabelle">
-              <thead>
-                <tr>
-                  <th style="width: 22%;">Zone</th>
-                  <th style="width: 16%;">Faktor</th>
-                  <th style="width: 16%;">von</th>
-                  <th style="width: 16%;">bis</th>
-                  <th style="width: 30%;">Ziel / Inhalt</th>
-                </tr>
-              </thead>
-              <tbody id="zonesBody"></tbody>
-            </table>
+<button onclick="exportPDF()">PDF</button>
 
-            <details class="info no-print">
-              <summary>Mehr Infos & Quellen (optional)</summary>
-              <div class="info-body">
-                <p style="margin:0 0 10px 0;">
-                  <strong>Berechnung (Karvonen / HRR):</strong><br>
-                  HF<sub>Ziel</sub> = HF<sub>Ruhe</sub> + (HF<sub>max</sub> − HF<sub>Ruhe</sub>) × Faktor
-                </p>
-                <p style="margin:0 0 10px 0;">
-                  <strong>Wichtig:</strong> Wenn HFmax wirklich der höchste gemessene Wert ist, sind Faktoren über 1,0 unsinnig,
-                  weil dann rechnerisch Werte über HFmax herauskommen würden.
-                </p>
-                <p style="margin:0;">
-                  <strong>Grundlage:</strong> Karvonen MJ et al. (1957), Herzfrequenzreserve als Trainingssteuerung.
-                </p>
-              </div>
-            </details>
+<button onclick="window.print()">Drucken</button>
 
-            <div class="hint" style="margin-top:12px;">
-              Hinweis: Werte werden kaufmännisch auf ganze bpm gerundet.
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-  </main>
+</div>
 
-  <footer>
-    <div class="container">
-      <div class="foot">
-        <div>© <span id="year"></span> RVSH</div>
-        <div>
-          <a href="#" onclick="return false;">Kontakt</a> ·
-          <a href="#" onclick="return false;">Impressum</a> ·
-          <a href="#" onclick="return false;">Datenschutz</a>
-        </div>
-      </div>
-    </div>
-  </footer>
+</div>
+</div>
 
-  <script>
-    const ZONES = [
-      {
-        name: "Zone 1 (Rekom)",
-        lo: 0.50,
-        hi: 0.60,
-        css: "z1",
-        goal: "Erholung / Regeneration (sehr locker)."
-      },
-      {
-        name: "Zone 2 (GA 1)",
-        lo: 0.60,
-        hi: 0.70,
-        css: "z2",
-        goal: "Dauerleistung auf Langzeit (>100 min), „Plaudertempo“."
-      },
-      {
-        name: "Zone 3 (GA 2)",
-        lo: 0.70,
-        hi: 0.80,
-        css: "z3",
-        goal: "Herz-Kreislauf & Energiestoffwechsel stärken, Kurzzeit <100 min."
-      },
-      {
-        name: "Zone 4 (Aerob)",
-        lo: 0.80,
-        hi: 0.90,
-        css: "z4",
-        goal: "Laktatkompensation, Verbesserung der muskulären Sauerstoffaufnahme, Entwicklungsbereich."
-      },
-      {
-        name: "Zone 5 (Anaerob)",
-        lo: 0.90,
-        hi: 1.00,
-        css: "z5",
-        goal: "Maximale Leistungsfähigkeit, Verbesserung der VO₂-Kapazität."
-      }
-    ];
+<div class="card" id="exportArea">
 
-    function clampNumber(n, min, max){
-      if (Number.isNaN(n)) return null;
-      return Math.min(max, Math.max(min, n));
-    }
+<div class="card-content">
 
-    function karvonen(hfMax, ruhe, factor){
-      return (hfMax - ruhe) * factor + ruhe;
-    }
+<div class="export-header">
 
-    function roundBpm(x){
-      return Math.round(x);
-    }
+<img src="rish-header-logo.png">
 
-    function fmtFactor(lo, hi){
-      return `${String(lo).replace(".", ",")} – ${String(hi).replace(".", ",")}`;
-    }
+<div>
+<strong>Trainingszonen</strong><br>
+RVSH
+</div>
 
-    function setBadge(ok, text){
-      const badge = document.getElementById("statusBadge");
-      badge.textContent = text;
-      badge.classList.toggle("warn", !ok);
-    }
+</div>
 
-    function renderZones(hfMax, ruhe){
-      const grid = document.getElementById("zonesGrid");
-      const body = document.getElementById("zonesBody");
+<div class="result-header">
 
-      grid.innerHTML = "";
-      body.innerHTML = "";
+<div><strong>Trainingsbereiche (bpm)</strong></div>
 
-      for (const z of ZONES){
-        const loBpm = roundBpm(karvonen(hfMax, ruhe, z.lo));
-        const hiBpm = roundBpm(karvonen(hfMax, ruhe, z.hi));
+<div class="badge" id="status">bereit</div>
 
-        const box = document.createElement("div");
-        box.className = `zone-box ${z.css}`;
-        box.innerHTML = `
-          <div class="zone-top">${z.name}</div>
-          <div class="zone-mid">
-            <div class="zone-range">${loBpm}–${hiBpm}</div>
-            <div class="zone-factor">${fmtFactor(z.lo, z.hi)} · bpm</div>
-          </div>
-          <div class="zone-goal">
-            <strong>Ziel / Inhalt</strong>
-            ${z.goal}
-          </div>
-        `;
-        grid.appendChild(box);
+</div>
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><span class="zone-name">${z.name}</span></td>
-          <td>${fmtFactor(z.lo, z.hi)}</td>
-          <td><span class="range-strong">${loBpm}</span></td>
-          <td><span class="range-strong">${hiBpm}</span></td>
-          <td>${z.goal}</td>
-        `;
-        body.appendChild(tr);
-      }
-    }
+<div class="chips">
 
-    function calculate(){
-      const name = (document.getElementById("personName").value || "").trim();
-      const hfMax = clampNumber(parseInt(document.getElementById("hfMax").value, 10), 80, 260);
-      const ruhe = clampNumber(parseInt(document.getElementById("ruhepuls").value, 10), 30, 120);
+<div class="chip">
+<div>Name</div>
+<div class="chip-value" id="nameOut">-</div>
+</div>
 
-      if (hfMax === null || ruhe === null){
-        setBadge(false, "Bitte Werte eingeben");
-        return;
-      }
+<div class="chip">
+<div>HFmax</div>
+<div class="chip-value" id="hfOut">170</div>
+</div>
 
-      if (ruhe >= hfMax){
-        setBadge(false, "Ruhepuls muss < HFmax sein");
-        return;
-      }
+<div class="chip">
+<div>Ruhepuls</div>
+<div class="chip-value" id="ruheOut">52</div>
+</div>
 
-      document.getElementById("nameOut").textContent = name || "–";
-      document.getElementById("hfMaxOut").textContent = hfMax;
-      document.getElementById("ruhepulsOut").textContent = ruhe;
+</div>
 
-      renderZones(hfMax, ruhe);
-      setBadge(true, "berechnet");
-    }
+<div class="zones" id="zones"></div>
 
-    async function exportPdf(){
-      const area = document.getElementById("exportArea");
-      const { jsPDF } = window.jspdf || {};
+</div>
 
-      if (!jsPDF || !window.html2canvas){
-        setBadge(false, "PDF-Libs nicht geladen");
-        alert("PDF-Export konnte nicht geladen werden. Bitte Internet prüfen oder alternativ 'Drucken' nutzen.");
-        return;
-      }
+</div>
 
-      setBadge(true, "PDF wird erzeugt…");
-      document.body.classList.add("exporting");
-      await new Promise(resolve => setTimeout(resolve, 100));
+</div>
 
-      const scale = Math.min(1.5, Math.max(1.1, window.devicePixelRatio || 1));
+</main>
 
-      const canvas = await window.html2canvas(area, {
-        scale,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        removeContainer: true
-      });
+<footer>
+© RVSH Trainingszonenrechner
+</footer>
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.86);
-      const pdf = new jsPDF({
-        orientation: "p",
-        unit: "mm",
-        format: "a4",
-        compress: true
-      });
+<script>
 
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 10;
+const zones = [
 
-      const imgW = pageW - (margin * 2);
-      const imgH = (canvas.height * imgW) / canvas.width;
+{name:"Z1",lo:0.50,hi:0.60,color:"z1",goal:"Regeneration"},
+{name:"Z2",lo:0.60,hi:0.70,color:"z2",goal:"Grundlagenausdauer"},
+{name:"Z3",lo:0.70,hi:0.80,color:"z3",goal:"GA2"},
+{name:"Z4",lo:0.80,hi:0.90,color:"z4",goal:"Schwelle"},
+{name:"Z5",lo:0.90,hi:1.00,color:"z5",goal:"Maximal"}
 
-      if (imgH <= pageH - (margin * 2)) {
-        pdf.addImage(imgData, "JPEG", margin, margin, imgW, imgH);
-      } else {
-        const pxPerMm = canvas.width / imgW;
-        const innerH = pageH - (margin * 2);
-        const slicePxH = Math.floor(innerH * pxPerMm);
+]
 
-        let yPx = 0;
-        let page = 0;
+function karvonen(max,ruhe,f){
 
-        while (yPx < canvas.height) {
-          const slice = document.createElement("canvas");
-          slice.width = canvas.width;
-          slice.height = Math.min(slicePxH, canvas.height - yPx);
+return Math.round((max-ruhe)*f+ruhe)
 
-          const ctx = slice.getContext("2d");
-          ctx.drawImage(
-            canvas,
-            0, yPx, canvas.width, slice.height,
-            0, 0, canvas.width, slice.height
-          );
+}
 
-          const sliceData = slice.toDataURL("image/jpeg", 0.86);
+function calculate(){
 
-          if (page > 0) pdf.addPage();
+const name=document.getElementById("name").value
+const max=parseInt(document.getElementById("hfmax").value)
+const ruhe=parseInt(document.getElementById("ruhe").value)
 
-          const sliceHmm = slice.height / pxPerMm;
-          pdf.addImage(sliceData, "JPEG", margin, margin, imgW, sliceHmm);
+document.getElementById("nameOut").innerText=name||"-"
+document.getElementById("hfOut").innerText=max
+document.getElementById("ruheOut").innerText=ruhe
 
-          yPx += slicePxH;
-          page += 1;
-        }
-      }
+const container=document.getElementById("zones")
+container.innerHTML=""
 
-      const now = new Date();
-      const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-      const safeName = (document.getElementById("personName").value || "")
-        .trim()
-        .replace(/[^\w\-äöüÄÖÜß ]/g, "");
-      const namePart = safeName ? `_${safeName.replace(/\s+/g, "_")}` : "";
+zones.forEach(z=>{
 
-      pdf.save(`RVSH_Trainingszonen${namePart}_${stamp}.pdf`);
+const lo=karvonen(max,ruhe,z.lo)
+const hi=karvonen(max,ruhe,z.hi)
 
-      document.body.classList.remove("exporting");
-      setBadge(true, "PDF gespeichert");
-    }
+const el=document.createElement("div")
 
-    document.getElementById("calcBtn").addEventListener("click", calculate);
-    document.getElementById("pdfBtn").addEventListener("click", exportPdf);
-    document.getElementById("printBtn").addEventListener("click", () => window.print());
+el.className="zone "+z.color
 
-    ["personName", "hfMax", "ruhepuls"].forEach(id => {
-      document.getElementById(id).addEventListener("input", calculate);
-    });
+el.innerHTML=`
+<div class="zone-title">${z.name}</div>
+<div class="zone-values">${lo} – ${hi}</div>
+<div class="zone-goal">${z.goal}</div>
+`
 
-    document.getElementById("year").textContent = String(new Date().getFullYear());
+container.appendChild(el)
 
-    calculate();
-  </script>
+})
+
+document.getElementById("status").innerText="berechnet"
+
+}
+
+async function exportPDF(){
+
+const area=document.getElementById("exportArea")
+
+const canvas=await html2canvas(area,{scale:1.5,useCORS:true})
+
+const img=canvas.toDataURL("image/jpeg",0.85)
+
+const {jsPDF}=window.jspdf
+
+const pdf=new jsPDF("p","mm","a4")
+
+const w=pdf.internal.pageSize.getWidth()
+const h=canvas.height*w/canvas.width
+
+pdf.addImage(img,"JPEG",10,10,w-20,h)
+
+pdf.save("Trainingszonen.pdf")
+
+}
+
+calculate()
+
+</script>
+
 </body>
 </html>
