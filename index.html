@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RVSH Trainingszonenrechner</title>
 
-  <!-- Typography similar to rish.de (Open Sans vibe) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -13,13 +12,11 @@
     rel="stylesheet"
   >
 
-  <!-- PDF Export (Client-side) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
 
   <style>
     :root{
-      /* rish.de-ish Enfold look */
       --blue: #1e73be;
       --blue-dark: #155a93;
       --bg: #f8f8f8;
@@ -28,19 +25,25 @@
       --muted: #555555;
       --border: #e6e6e6;
 
-      /* Zone colors (green -> yellow -> red) */
-      --z1: #2e7d32;
-      --z2: #66bb6a;
-      --z3: #f9a825;
-      --z4: #fb8c00;
-      --z5: #e53935;
+      --z1: #dbeafe;
+      --z2: #bbf7d0;
+      --z3: #fde68a;
+      --z4: #fdba74;
+      --z5: #fca5a5;
+
+      --z1-accent: #2563eb;
+      --z2-accent: #15803d;
+      --z3-accent: #ca8a04;
+      --z4-accent: #ea580c;
+      --z5-accent: #dc2626;
     }
 
     *{ box-sizing: border-box; }
+
     body{
-      margin:0;
-      font-family:"Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
+      margin: 0;
+      font-family: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
       background: var(--bg);
       line-height: 1.6;
     }
@@ -48,59 +51,57 @@
     a{ color: var(--blue); text-decoration: none; }
     a:hover{ color: var(--blue-dark); text-decoration: underline; }
 
-    /* Top bar */
     header{
-      background:#fff;
+      background: #fff;
       border-bottom: 3px solid var(--blue);
     }
 
     .container{
-      max-width: 1020px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 16px;
     }
 
     .header-inner{
-      display:flex;
-      align-items:center;
-      gap:14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
       padding: 14px 0;
     }
 
-    .logo{
-      height:44px;
-      width:auto;
-      border-radius: 6px;
-      background:#fff;
+    .site-logo{
+      height: 44px;
+      width: auto;
+      display: block;
     }
 
-    .title-block{ min-width:0; }
-    .title-block h1{
-      margin:0;
+    .site-title h1{
+      margin: 0;
       font-size: 20px;
       font-weight: 700;
       color: #222;
     }
-    .title-block p{
+
+    .site-title p{
       margin: 2px 0 0 0;
       color: var(--muted);
       font-size: 13px;
     }
 
     main{
-      padding: 18px 0 30px 0;
+      padding: 18px 0 30px;
     }
 
     .layout{
-      display:grid;
+      display: grid;
       grid-template-columns: 1fr;
       gap: 14px;
-      align-items:start;
+      align-items: start;
     }
 
     @media (min-width: 920px){
       .layout{
-        grid-template-columns: 360px 1fr;
+        grid-template-columns: 320px 1fr;
       }
     }
 
@@ -108,11 +109,11 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
-      overflow:hidden;
+      overflow: hidden;
     }
 
     .card h2{
-      margin:0;
+      margin: 0;
       padding: 12px 14px;
       font-size: 15px;
       font-weight: 700;
@@ -126,7 +127,7 @@
     }
 
     label{
-      display:block;
+      display: block;
       font-size: 13px;
       font-weight: 700;
       margin: 10px 0 6px 0;
@@ -134,13 +135,13 @@
     }
 
     input{
-      width:100%;
+      width: 100%;
       padding: 10px 12px;
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 15px;
-      outline:none;
-      background:#fff;
+      outline: none;
+      background: #fff;
     }
 
     input:focus{
@@ -148,12 +149,36 @@
       box-shadow: 0 0 0 3px rgba(30,115,190,.12);
     }
 
-    .two{
-      display:flex;
-      gap:10px;
+    .actions{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
     }
 
-    .two input{ flex:1; }
+    .btn{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #222;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      flex: 1 1 140px;
+      min-height: 42px;
+    }
+
+    .btn.primary{
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .btn.primary:hover{
+      background: var(--blue-dark);
+      border-color: var(--blue-dark);
+    }
 
     .hint{
       margin-top: 10px;
@@ -161,41 +186,12 @@
       color: var(--muted);
     }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 12px;
-    }
-
-    .btn{
-      border: 1px solid var(--border);
-      background:#fff;
-      color:#222;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-weight: 700;
-      cursor:pointer;
-      font-size: 14px;
-      flex: 1 1 150px;
-      min-height: 42px;
-    }
-
-    .btn.primary{
-      background: var(--blue);
-      border-color: var(--blue);
-      color:#fff;
-    }
-
-    .btn.primary:hover{ background: var(--blue-dark); border-color: var(--blue-dark); }
-    .btn:hover{ border-color: #d6d6d6; }
-
     .result-head{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-      flex-wrap:wrap;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      flex-wrap: wrap;
     }
 
     .badge{
@@ -203,15 +199,15 @@
       padding: 6px 10px;
       border-radius: 999px;
       border: 1px solid rgba(0,0,0,.08);
-      background: rgba(46,125,50,.10);
-      color: #1b5e20;
+      background: rgba(21,128,61,.10);
+      color: #166534;
       font-weight: 800;
       white-space: nowrap;
     }
 
     .badge.warn{
-      background: rgba(251,140,0,.12);
-      color: #8a4b00;
+      background: rgba(234,88,12,.10);
+      color: #9a3412;
     }
 
     .meta{
@@ -220,11 +216,50 @@
       color: var(--muted);
     }
 
+    .export-header{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .export-brand{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .export-brand img{
+      height: 42px;
+      width: auto;
+      display: block;
+    }
+
+    .export-brand-text{
+      min-width: 0;
+    }
+
+    .export-brand-text strong{
+      display: block;
+      font-size: 16px;
+      color: #222;
+    }
+
+    .export-brand-text span{
+      display: block;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
     .chips{
-      margin-top: 12px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
     }
 
     .chip{
@@ -232,7 +267,7 @@
       border-radius: 10px;
       padding: 10px 12px;
       min-width: 160px;
-      background:#fff;
+      background: #fff;
     }
 
     .chip .k{
@@ -241,22 +276,96 @@
     }
 
     .chip .v{
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
-      color:#222;
+      color: #222;
       margin-top: 2px;
     }
 
-    /* Table (desktop) */
+    .zones-grid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    @media (min-width: 900px){
+      .zones-grid{
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    @media (min-width: 640px) and (max-width: 899px){
+      .zones-grid{
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .zone-box{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .zone-box .zone-top{
+      padding: 10px 12px;
+      font-weight: 800;
+      font-size: 14px;
+      color: #222;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+
+    .zone-box.z1 .zone-top{ background: var(--z1); border-left: 6px solid var(--z1-accent); }
+    .zone-box.z2 .zone-top{ background: var(--z2); border-left: 6px solid var(--z2-accent); }
+    .zone-box.z3 .zone-top{ background: var(--z3); border-left: 6px solid var(--z3-accent); }
+    .zone-box.z4 .zone-top{ background: var(--z4); border-left: 6px solid var(--z4-accent); }
+    .zone-box.z5 .zone-top{ background: var(--z5); border-left: 6px solid var(--z5-accent); }
+
+    .zone-box .zone-mid{
+      padding: 14px 12px 10px 12px;
+      text-align: center;
+    }
+
+    .zone-range{
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.1;
+      color: #111;
+    }
+
+    .zone-factor{
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .zone-goal{
+      padding: 0 12px 14px 12px;
+      font-size: 13px;
+      color: var(--text);
+      margin-top: auto;
+    }
+
+    .zone-goal strong{
+      display: block;
+      margin-bottom: 4px;
+      color: #222;
+    }
+
     table{
-      width:100%;
+      width: 100%;
       border-collapse: collapse;
-      margin-top: 12px;
+      margin-top: 16px;
       font-size: 14px;
     }
 
     th, td{
-      text-align:left;
+      text-align: left;
       padding: 10px 10px;
       border-bottom: 1px solid var(--border);
       vertical-align: top;
@@ -272,220 +381,83 @@
 
     .zone-name{
       font-weight: 800;
-      color:#222;
+      color: #222;
     }
 
-    tr.zone-row td:first-child{
-      position: relative;
-      padding-left: 18px;
-    }
-    tr.zone-row td:first-child::before{
-      content:"";
-      position:absolute;
-      left: 8px;
-      top: 10px;
-      bottom: 10px;
-      width: 6px;
-      border-radius: 6px;
-      background: var(--border);
-    }
-
-    tr.z1 td:first-child::before{ background: var(--z1); }
-    tr.z2 td:first-child::before{ background: var(--z2); }
-    tr.z3 td:first-child::before{ background: var(--z3); }
-    tr.z4 td:first-child::before{ background: var(--z4); }
-    tr.z5 td:first-child::before{ background: var(--z5); }
-
-    .pill{
-      display:inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 12px;
+    .range-strong{
       font-weight: 800;
-      border: 1px solid rgba(0,0,0,.08);
-      background: rgba(30,115,190,.08);
-      color: var(--blue-dark);
+      font-size: 15px;
+      color: #111;
       white-space: nowrap;
-      margin-right: 6px;
     }
 
-    /* Scale */
-    .scale{
-      margin-top: 14px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      background: #fafafa;
-    }
-
-    .scale-top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:baseline;
-    }
-
-    .scale-top strong{ font-size: 13px; color:#222; }
-    .scale-top span{ font-size: 12.5px; color: var(--muted); }
-
-    .bar{
-      position: relative;
-      margin-top: 10px;
-      height: 18px;
-      border-radius: 999px;
-      overflow:hidden;
-      border: 1px solid rgba(0,0,0,.08);
-      background: #e9eef3;
-      display:flex;
-    }
-
-    .seg{ height:100%; opacity:.88; }
-    .seg.z1{ background: var(--z1); }
-    .seg.z2{ background: var(--z2); }
-    .seg.z3{ background: var(--z3); }
-    .seg.z4{ background: var(--z4); }
-    .seg.z5{ background: var(--z5); }
-
-    .band-fill{
-      position:absolute;
-      top:0;
-      height:100%;
-      background:#111827;
-      opacity:.18;
-      pointer-events:none;
-    }
-    .band-line{
-      position:absolute;
-      top:-6px;
-      width:2px;
-      height:30px;
-      background:#111827;
-      opacity:.85;
-      pointer-events:none;
-    }
-    .band-label{
-      position:absolute;
-      top:-26px;
-      transform: translateX(-50%);
-      font-size: 11px;
-      font-weight: 800;
-      background:#fff;
-      border: 1px solid rgba(0,0,0,.10);
-      padding: 2px 6px;
-      border-radius: 999px;
-      white-space: nowrap;
-      pointer-events:none;
-    }
-
-    /* Mobile cards view */
-    .zones-cards{ display:none; }
-    @media (max-width: 760px){
-      .zones-table{ display:none; }
-      .zones-cards{
-        display:grid;
-        gap:10px;
-        margin-top: 12px;
-      }
-    }
-
-    .zone-card{
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow:hidden;
-      background:#fff;
-    }
-    .zone-card .head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding: 10px 12px;
-      color:#fff;
-      font-weight:800;
-    }
-    .zone-card.z1 .head{ background: var(--z1); }
-    .zone-card.z2 .head{ background: var(--z2); color:#0b2b14; }
-    .zone-card.z3 .head{ background: var(--z3); color:#3b2b00; }
-    .zone-card.z4 .head{ background: var(--z4); }
-    .zone-card.z5 .head{ background: var(--z5); }
-
-    .zone-card .body{
-      padding: 10px 12px 12px 12px;
-      font-size: 13px;
-    }
-
-    .kv{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      padding: 6px 0;
-      border-bottom: 1px dashed rgba(0,0,0,.10);
-    }
-    .kv:last-child{ border-bottom:0; }
-    .kv .k{ color: var(--muted); font-weight:700; }
-    .kv .v{ font-weight:800; }
-
-    .goal{
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(0,0,0,.08);
-    }
-    .goal strong{ display:block; margin-bottom: 4px; }
-
-    /* Optional info block */
     details.info{
       margin-top: 14px;
       border: 1px solid var(--border);
       border-radius: 10px;
-      background:#fafafa;
-      overflow:hidden;
+      background: #fafafa;
+      overflow: hidden;
     }
+
     details.info summary{
-      cursor:pointer;
+      cursor: pointer;
       padding: 12px 14px;
       font-weight: 800;
       color: var(--blue-dark);
-      list-style:none;
+      list-style: none;
     }
-    details.info summary::-webkit-details-marker{ display:none; }
+
+    details.info summary::-webkit-details-marker{
+      display: none;
+    }
+
     details.info .info-body{
       padding: 0 14px 14px 14px;
       font-size: 13px;
       color: var(--text);
     }
 
-    /* PDF export: stable layout, smaller capture, no sidebar */
-    body.exporting header{ display:none; }
-    body.exporting main{ padding:0; }
-    body.exporting .layout{ grid-template-columns: 1fr; }
-    body.exporting .no-print{ display:none !important; }
-    body.exporting .card{ border-radius: 0; }
-    body.exporting #exportArea{ max-width: 190mm; margin: 0 auto; }
+    body.exporting header{
+      display: none;
+    }
+
+    body.exporting main{
+      padding: 0;
+    }
+
+    body.exporting .layout{
+      grid-template-columns: 1fr;
+    }
+
+    body.exporting .no-print{
+      display: none !important;
+    }
+
+    body.exporting #exportArea{
+      max-width: 190mm;
+      margin: 0 auto;
+    }
 
     footer{
-      background:#3a3a3a;
-      color:#eaeaea;
+      background: #3a3a3a;
+      color: #eaeaea;
       padding: 18px 0;
       margin-top: 10px;
       font-size: 12.5px;
     }
-    footer .foot{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
+
+    .foot{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     @media print{
-      .no-print{ display:none !important; }
-      body{ background:#fff; }
-      header{ border-bottom: 0; }
-      footer{ display:none; }
-      .card{ border-radius:0; }
-      .zones-cards{ display:none !important; }
-      .zones-table{ display:table !important; }
-      .bar, tr.zone-row td:first-child::before{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print{ display: none !important; }
+      body{ background: #fff; }
+      header{ display: none; }
+      footer{ display: none; }
     }
   </style>
 </head>
@@ -494,10 +466,15 @@
   <header>
     <div class="container">
       <div class="header-inner">
-        <img src="https://www.rish.de/images/rish-header-logo.png" alt="rish.de" class="logo" referrerpolicy="no-referrer">
-        <div class="title-block">
-          <h1>Trainingszonenrechner (Karvonen / HRR)</h1>
-          <p>Ruderverband Schleswig-Holstein (RVSH) · 5 Zonen · LT1/LT2 als Band</p>
+        <img
+          src="https://www.rish.de/images/rish-header-logo.png"
+          alt="RVSH"
+          class="site-logo"
+          referrerpolicy="no-referrer"
+        >
+        <div class="site-title">
+          <h1>Trainingszonenrechner</h1>
+          <p>Ruderverband Schleswig-Holstein (RVSH) · Karvonen / HRR</p>
         </div>
       </div>
     </div>
@@ -506,7 +483,6 @@
   <main>
     <div class="container">
       <div class="layout">
-        <!-- Inputs -->
         <section class="card no-print" aria-label="Eingaben">
           <h2>Eingaben</h2>
           <div class="content">
@@ -519,18 +495,6 @@
             <label for="ruhepuls">Ruhepuls – 1/min</label>
             <input id="ruhepuls" type="number" min="30" max="120" step="1" value="52">
 
-            <label>LT1 Band (HRR-Faktor)</label>
-            <div class="two">
-              <input id="lt1Lo" type="number" min="0.50" max="0.95" step="0.01" value="0.68">
-              <input id="lt1Hi" type="number" min="0.50" max="0.95" step="0.01" value="0.72">
-            </div>
-
-            <label>LT2 Band (HRR-Faktor)</label>
-            <div class="two">
-              <input id="lt2Lo" type="number" min="0.60" max="1.00" step="0.01" value="0.86">
-              <input id="lt2Hi" type="number" min="0.60" max="1.00" step="0.01" value="0.92">
-            </div>
-
             <div class="actions">
               <button class="btn primary" id="calcBtn" type="button">Berechnen</button>
               <button class="btn" id="pdfBtn" type="button">PDF herunterladen</button>
@@ -538,24 +502,38 @@
             </div>
 
             <div class="hint">
-              Formel: (HFmax − Ruhepuls) × Faktor + Ruhepuls (Karvonen/HRR).<br>
-              Faktoren bleiben ≤ 1,0, sonst wären Werte &gt; HFmax möglich (bei echter HFmax aus Max-Test unsinnig).
+              Formel: (HFmax − Ruhepuls) × Trainingsfaktor + Ruhepuls<br>
+              Zonen: 50–60% · 60–70% · 70–80% · 80–90% · 90–100%
             </div>
           </div>
         </section>
 
-        <!-- Results -->
         <section class="card" id="exportArea" aria-label="Ergebnisse">
           <h2>Ergebnisse</h2>
           <div class="content">
+            <div class="export-header">
+              <div class="export-brand">
+                <img
+                  src="https://www.rish.de/images/rish-header-logo.png"
+                  alt="RVSH"
+                  referrerpolicy="no-referrer"
+                >
+                <div class="export-brand-text">
+                  <strong>Trainingszonenrechner</strong>
+                  <span>Ruderverband Schleswig-Holstein (RVSH)</span>
+                </div>
+              </div>
+
+              <div class="badge" id="statusBadge">bereit</div>
+            </div>
+
             <div class="result-head">
               <div>
                 <div style="font-weight:800; font-size:16px; color:#222;">Herzfrequenz-Trainingsbereiche (bpm)</div>
                 <div class="meta">
-                  Z1 50–60% · Z2 60–70% · Z3 70–80% · Z4 80–90% · Z5 90–100% (HRR-Faktoren)
+                  Die wichtigsten Werte sind unten direkt als große Bereiche von–bis hervorgehoben.
                 </div>
               </div>
-              <div class="badge" id="statusBadge">bereit</div>
             </div>
 
             <div class="chips">
@@ -571,75 +549,36 @@
                 <div class="k">Ruhepuls</div>
                 <div class="v" id="ruhepulsOut">52</div>
               </div>
-              <div class="chip">
-                <div class="k">LT1 Band</div>
-                <div class="v" id="lt1Out">–</div>
-              </div>
-              <div class="chip">
-                <div class="k">LT2 Band</div>
-                <div class="v" id="lt2Out">–</div>
-              </div>
             </div>
 
-            <!-- Desktop table -->
-            <table class="zones-table" aria-label="Zonentabelle">
+            <div class="zones-grid" id="zonesGrid"></div>
+
+            <table aria-label="Zonentabelle">
               <thead>
                 <tr>
-                  <th style="width: 18%;">Zone</th>
-                  <th style="width: 14%;">Marker</th>
-                  <th style="width: 14%;">Faktor</th>
-                  <th style="width: 12%;">von</th>
-                  <th style="width: 12%;">bis</th>
+                  <th style="width: 22%;">Zone</th>
+                  <th style="width: 16%;">Faktor</th>
+                  <th style="width: 16%;">von</th>
+                  <th style="width: 16%;">bis</th>
                   <th style="width: 30%;">Ziel / Inhalt</th>
                 </tr>
               </thead>
               <tbody id="zonesBody"></tbody>
             </table>
 
-            <!-- Mobile cards -->
-            <div id="zonesCards" class="zones-cards" aria-label="Zonen (mobil)"></div>
-
-            <!-- Scale -->
-            <div class="scale" aria-label="Skala">
-              <div class="scale-top">
-                <strong>Skala (Ruhe → HFmax)</strong>
-                <span id="scaleMeta">–</span>
-              </div>
-
-              <div class="bar" id="scaleBar">
-                <!-- segments are injected -->
-                <div class="band-fill" id="lt1Fill" style="left:0;width:0;"></div>
-                <div class="band-line" id="lt1LoLine" style="left:0;"></div>
-                <div class="band-line" id="lt1HiLine" style="left:0;"></div>
-                <div class="band-label" id="lt1Label" style="left:0;">LT1</div>
-
-                <div class="band-fill" id="lt2Fill" style="left:0;width:0;"></div>
-                <div class="band-line" id="lt2LoLine" style="left:0;"></div>
-                <div class="band-line" id="lt2HiLine" style="left:0;"></div>
-                <div class="band-label" id="lt2Label" style="left:0;">LT2</div>
-              </div>
-
-              <div class="meta" style="margin-top:8px;">
-                <span class="pill">LT1</span> erste Schwelle · <span class="pill">LT2</span> zweite Schwelle (Bänder sind editierbar)
-              </div>
-            </div>
-
-            <!-- Optional info for interested people -->
             <details class="info no-print">
               <summary>Mehr Infos & Quellen (optional)</summary>
               <div class="info-body">
                 <p style="margin:0 0 10px 0;">
-                  <strong>Berechnung (Karvonen/HRR):</strong>
-                  HF<sub>Ziel</sub> = HF<sub>Ruhe</sub> + (HF<sub>max</sub> − HF<sub>Ruhe</sub>) × Faktor.
-                  Faktoren liegen definitionsgemäß zwischen 0 und 1.
+                  <strong>Berechnung (Karvonen / HRR):</strong><br>
+                  HF<sub>Ziel</sub> = HF<sub>Ruhe</sub> + (HF<sub>max</sub> − HF<sub>Ruhe</sub>) × Faktor
                 </p>
                 <p style="margin:0 0 10px 0;">
-                  <strong>LT1/LT2:</strong> Schwellen sind individuell (ideal: Stufentest mit Laktat oder ventilatorische Schwellen).
-                  Deshalb werden hier Bänder genutzt, die Trainer:innen pro Athlet:in anpassen können.
+                  <strong>Wichtig:</strong> Wenn HFmax wirklich der höchste gemessene Wert ist, sind Faktoren über 1,0 unsinnig,
+                  weil dann rechnerisch Werte über HFmax herauskommen würden.
                 </p>
                 <p style="margin:0;">
-                  <strong>Grundlage:</strong> Karvonen MJ et al. (1957) HRR-Konzept; in der Praxis korreliert %HRR näherungsweise mit %VO₂max.
-                  Für Leistungssport zusätzlich Watt/Pace/RPE nutzen (HF driftet mit Temperatur, Ermüdung, Hydration).
+                  <strong>Grundlage:</strong> Karvonen MJ et al. (1957), Herzfrequenzreserve als Trainingssteuerung.
                 </p>
               </div>
             </details>
@@ -656,7 +595,7 @@
   <footer>
     <div class="container">
       <div class="foot">
-        <div>© <span id="year"></span> RVSH / rish.de Stil (Enfold-inspiriert)</div>
+        <div>© <span id="year"></span> RVSH</div>
         <div>
           <a href="#" onclick="return false;">Kontakt</a> ·
           <a href="#" onclick="return false;">Impressum</a> ·
@@ -666,324 +605,225 @@
     </div>
   </footer>
 
-<script>
-  // Zonen gemäß Vorlage (50–100% HRR)
-  const ZONES = [
-    { name: "Zone 1 (Rekom)",  lo: 0.50, hi: 0.60, css: "z1", goal: "Erholung / Regeneration (sehr locker)." },
-    { name: "Zone 2 (GA 1)",   lo: 0.60, hi: 0.70, css: "z2", goal: "Dauerleistung auf Langzeit (>100 min), „Plaudertempo“." },
-    { name: "Zone 3 (GA 2)",   lo: 0.70, hi: 0.80, css: "z3", goal: "Herz-Kreislauf & Energiestoffwechsel stärken, Kurzzeit <100 min." },
-    { name: "Zone 4 (Aerob)",  lo: 0.80, hi: 0.90, css: "z4", goal: "Laktatkompensation, muskuläre Verbesserung, O₂-Aufnahme („Entwicklungsbereich“)." },
-    { name: "Zone 5 (Anaerob)",lo: 0.90, hi: 1.00, css: "z5", goal: "Maximale Leistungsfähigkeit, Verbesserung der VO₂-Kapazität." },
-  ];
+  <script>
+    const ZONES = [
+      {
+        name: "Zone 1 (Rekom)",
+        lo: 0.50,
+        hi: 0.60,
+        css: "z1",
+        goal: "Erholung / Regeneration (sehr locker)."
+      },
+      {
+        name: "Zone 2 (GA 1)",
+        lo: 0.60,
+        hi: 0.70,
+        css: "z2",
+        goal: "Dauerleistung auf Langzeit (>100 min), „Plaudertempo“."
+      },
+      {
+        name: "Zone 3 (GA 2)",
+        lo: 0.70,
+        hi: 0.80,
+        css: "z3",
+        goal: "Herz-Kreislauf & Energiestoffwechsel stärken, Kurzzeit <100 min."
+      },
+      {
+        name: "Zone 4 (Aerob)",
+        lo: 0.80,
+        hi: 0.90,
+        css: "z4",
+        goal: "Laktatkompensation, Verbesserung der muskulären Sauerstoffaufnahme, Entwicklungsbereich."
+      },
+      {
+        name: "Zone 5 (Anaerob)",
+        lo: 0.90,
+        hi: 1.00,
+        css: "z5",
+        goal: "Maximale Leistungsfähigkeit, Verbesserung der VO₂-Kapazität."
+      }
+    ];
 
-  function clampNumber(n, min, max){
-    if (Number.isNaN(n)) return null;
-    return Math.min(max, Math.max(min, n));
-  }
-
-  function karvonen(hfMax, ruhe, factor){
-    return (hfMax - ruhe) * factor + ruhe;
-  }
-
-  function roundBpm(x){
-    return Math.round(x);
-  }
-
-  function fmtFactor(lo, hi){
-    return `${String(lo).replace(".", ",")} – ${String(hi).replace(".", ",")}`;
-  }
-
-  function setBadge(ok, text){
-    const b = document.getElementById("statusBadge");
-    b.textContent = text;
-    b.classList.toggle("warn", !ok);
-  }
-
-  function overlaps(zoneLo, zoneHi, bandLo, bandHi){
-    return Math.max(zoneLo, bandLo) <= Math.min(zoneHi, bandHi);
-  }
-
-  function markerTags(z, lt1Lo, lt1Hi, lt2Lo, lt2Hi){
-    const tags = [];
-    if (overlaps(z.lo, z.hi, lt1Lo, lt1Hi)) tags.push("LT1");
-    if (overlaps(z.lo, z.hi, lt2Lo, lt2Hi)) tags.push("LT2");
-    return tags;
-  }
-
-  function renderZonesTable(hfMax, ruhe, lt1Lo, lt1Hi, lt2Lo, lt2Hi){
-    const tbody = document.getElementById("zonesBody");
-    tbody.innerHTML = "";
-
-    for (const z of ZONES){
-      const loBpm = roundBpm(karvonen(hfMax, ruhe, z.lo));
-      const hiBpm = roundBpm(karvonen(hfMax, ruhe, z.hi));
-      const tags = markerTags(z, lt1Lo, lt1Hi, lt2Lo, lt2Hi);
-
-      const tr = document.createElement("tr");
-      tr.className = `zone-row ${z.css}`;
-
-      const tdZone = document.createElement("td");
-      tdZone.innerHTML = `<span class="zone-name">${z.name}</span>`;
-      tr.appendChild(tdZone);
-
-      const tdMarker = document.createElement("td");
-      tdMarker.innerHTML = tags.length ? tags.map(t => `<span class="pill">${t}</span>`).join("") : "–";
-      tr.appendChild(tdMarker);
-
-      const tdFac = document.createElement("td");
-      tdFac.textContent = fmtFactor(z.lo, z.hi);
-      tr.appendChild(tdFac);
-
-      const tdLo = document.createElement("td");
-      tdLo.textContent = loBpm;
-      tr.appendChild(tdLo);
-
-      const tdHi = document.createElement("td");
-      tdHi.textContent = hiBpm;
-      tr.appendChild(tdHi);
-
-      const tdGoal = document.createElement("td");
-      tdGoal.textContent = z.goal;
-      tr.appendChild(tdGoal);
-
-      tbody.appendChild(tr);
-    }
-  }
-
-  function renderZonesCards(hfMax, ruhe, lt1Lo, lt1Hi, lt2Lo, lt2Hi){
-    const wrap = document.getElementById("zonesCards");
-    wrap.innerHTML = "";
-
-    for (const z of ZONES){
-      const loBpm = roundBpm(karvonen(hfMax, ruhe, z.lo));
-      const hiBpm = roundBpm(karvonen(hfMax, ruhe, z.hi));
-      const tags = markerTags(z, lt1Lo, lt1Hi, lt2Lo, lt2Hi);
-
-      const tagsHtml = tags.length
-        ? tags.map(t => `<span class="pill">${t}</span>`).join("")
-        : "–";
-
-      const card = document.createElement("div");
-      card.className = `zone-card ${z.css}`;
-      card.innerHTML = `
-        <div class="head">
-          <div>${z.name}</div>
-          <div>${loBpm}–${hiBpm} bpm</div>
-        </div>
-        <div class="body">
-          <div class="kv"><div class="k">Faktor</div><div class="v">${fmtFactor(z.lo, z.hi)}</div></div>
-          <div class="kv"><div class="k">Marker</div><div class="v">${tagsHtml}</div></div>
-          <div class="goal"><strong>Ziel / Inhalt</strong>${z.goal}</div>
-        </div>
-      `;
-      wrap.appendChild(card);
-    }
-  }
-
-  function buildScaleSegments(){
-    const bar = document.getElementById("scaleBar");
-    const keep = new Set(["lt1Fill","lt1LoLine","lt1HiLine","lt1Label","lt2Fill","lt2LoLine","lt2HiLine","lt2Label"]);
-    Array.from(bar.children).forEach(ch => {
-      if (!keep.has(ch.id)) bar.removeChild(ch);
-    });
-
-    const span = 0.50; // 0.50..1.00
-    for (const z of ZONES){
-      const seg = document.createElement("div");
-      seg.className = `seg ${z.css}`;
-      seg.style.width = `${((z.hi - z.lo) / span) * 100}%`;
-      bar.insertBefore(seg, document.getElementById("lt1Fill"));
-    }
-  }
-
-  function factorToPct(f){
-    const minF = 0.50;
-    const maxF = 1.00;
-    const pct = ((f - minF) / (maxF - minF)) * 100;
-    return Math.min(100, Math.max(0, pct));
-  }
-
-  function placeBand(prefix, loF, hiF, ruhe, hfMax, label){
-    const loPct = factorToPct(loF);
-    const hiPct = factorToPct(hiF);
-
-    const fill = document.getElementById(`${prefix}Fill`);
-    const loLine = document.getElementById(`${prefix}LoLine`);
-    const hiLine = document.getElementById(`${prefix}HiLine`);
-    const lab = document.getElementById(`${prefix}Label`);
-
-    fill.style.left = `${Math.min(loPct, hiPct)}%`;
-    fill.style.width = `${Math.abs(hiPct - loPct)}%`;
-
-    loLine.style.left = `${loPct}%`;
-    hiLine.style.left = `${hiPct}%`;
-
-    const loBpm = roundBpm(karvonen(hfMax, ruhe, loF));
-    const hiBpm = roundBpm(karvonen(hfMax, ruhe, hiF));
-    const mid = (loPct + hiPct) / 2;
-
-    lab.style.left = `${mid}%`;
-    lab.textContent = `${label}: ${loBpm}–${hiBpm}`;
-  }
-
-  function validateBands(lt1Lo, lt1Hi, lt2Lo, lt2Hi){
-    if ([lt1Lo, lt1Hi, lt2Lo, lt2Hi].some(Number.isNaN)){
-      return "LT-Bänder ungültig";
-    }
-    if (lt1Lo >= lt1Hi){
-      return "LT1: Untergrenze < Obergrenze";
-    }
-    if (lt2Lo >= lt2Hi){
-      return "LT2: Untergrenze < Obergrenze";
-    }
-    if (!(lt1Lo >= 0.50 && lt1Hi <= 0.95)){
-      return "LT1 außerhalb 0,50–0,95";
-    }
-    if (!(lt2Lo >= 0.60 && lt2Hi <= 1.00)){
-      return "LT2 außerhalb 0,60–1,00";
-    }
-    if (lt1Hi >= lt2Lo){
-      return "LT1 muss unter LT2 liegen (LT1_hi < LT2_lo)";
-    }
-    return null;
-  }
-
-  function calculate(){
-    const nameIn = (document.getElementById("personName").value || "").trim();
-    const hfMaxIn = clampNumber(parseInt(document.getElementById("hfMax").value, 10), 80, 260);
-    const ruheIn = clampNumber(parseInt(document.getElementById("ruhepuls").value, 10), 30, 120);
-
-    if (hfMaxIn === null || ruheIn === null){
-      setBadge(false, "Bitte Werte eingeben");
-      return;
-    }
-    if (ruheIn >= hfMaxIn){
-      setBadge(false, "Ruhepuls muss < HFmax sein");
-      return;
+    function clampNumber(n, min, max){
+      if (Number.isNaN(n)) return null;
+      return Math.min(max, Math.max(min, n));
     }
 
-    const lt1Lo = parseFloat(document.getElementById("lt1Lo").value);
-    const lt1Hi = parseFloat(document.getElementById("lt1Hi").value);
-    const lt2Lo = parseFloat(document.getElementById("lt2Lo").value);
-    const lt2Hi = parseFloat(document.getElementById("lt2Hi").value);
-
-    const bandErr = validateBands(lt1Lo, lt1Hi, lt2Lo, lt2Hi);
-    if (bandErr){
-      setBadge(false, bandErr);
-      return;
+    function karvonen(hfMax, ruhe, factor){
+      return (hfMax - ruhe) * factor + ruhe;
     }
 
-    document.getElementById("nameOut").textContent = nameIn.length ? nameIn : "–";
-    document.getElementById("hfMaxOut").textContent = hfMaxIn;
-    document.getElementById("ruhepulsOut").textContent = ruheIn;
-
-    const lt1LoBpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt1Lo));
-    const lt1HiBpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt1Hi));
-    const lt2LoBpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt2Lo));
-    const lt2HiBpm = roundBpm(karvonen(hfMaxIn, ruheIn, lt2Hi));
-
-    document.getElementById("lt1Out").textContent =
-      `${lt1LoBpm}–${lt1HiBpm} bpm (${String(lt1Lo).replace(".", ",")}–${String(lt1Hi).replace(".", ",")})`;
-    document.getElementById("lt2Out").textContent =
-      `${lt2LoBpm}–${lt2HiBpm} bpm (${String(lt2Lo).replace(".", ",")}–${String(lt2Hi).replace(".", ",")})`;
-
-    const hrr = hfMaxIn - ruheIn;
-    document.getElementById("scaleMeta").textContent = `HRR = ${hrr} bpm`;
-
-    renderZonesTable(hfMaxIn, ruheIn, lt1Lo, lt1Hi, lt2Lo, lt2Hi);
-    renderZonesCards(hfMaxIn, ruheIn, lt1Lo, lt1Hi, lt2Lo, lt2Hi);
-
-    buildScaleSegments();
-    placeBand("lt1", lt1Lo, lt1Hi, ruheIn, hfMaxIn, "LT1");
-    placeBand("lt2", lt2Lo, lt2Hi, ruheIn, hfMaxIn, "LT2");
-
-    setBadge(true, "berechnet");
-  }
-
-  async function exportPdf(){
-    const area = document.getElementById("exportArea");
-    const { jsPDF } = window.jspdf || {};
-    if (!jsPDF || !window.html2canvas){
-      setBadge(false, "PDF-Libs nicht geladen");
-      alert("PDF-Export konnte nicht geladen werden. Bitte Internet prüfen oder alternativ über 'Drucken' als PDF speichern.");
-      return;
+    function roundBpm(x){
+      return Math.round(x);
     }
 
-    setBadge(true, "PDF wird erzeugt…");
-    document.body.classList.add("exporting");
-    await new Promise(r => setTimeout(r, 80));
+    function fmtFactor(lo, hi){
+      return `${String(lo).replace(".", ",")} – ${String(hi).replace(".", ",")}`;
+    }
 
-    const scale = Math.min(1.5, Math.max(1.1, window.devicePixelRatio || 1));
-    const canvas = await window.html2canvas(area, {
-      scale,
-      backgroundColor: "#ffffff",
-      useCORS: true,
-      removeContainer: true
-    });
+    function setBadge(ok, text){
+      const badge = document.getElementById("statusBadge");
+      badge.textContent = text;
+      badge.classList.toggle("warn", !ok);
+    }
 
-    // JPEG is much smaller than PNG
-    const jpegQuality = 0.86;
-    const imgData = canvas.toDataURL("image/jpeg", jpegQuality);
+    function renderZones(hfMax, ruhe){
+      const grid = document.getElementById("zonesGrid");
+      const body = document.getElementById("zonesBody");
 
-    const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
+      grid.innerHTML = "";
+      body.innerHTML = "";
 
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const margin = 10;
+      for (const z of ZONES){
+        const loBpm = roundBpm(karvonen(hfMax, ruhe, z.lo));
+        const hiBpm = roundBpm(karvonen(hfMax, ruhe, z.hi));
 
-    const imgW = pageW - margin * 2;
-    const imgH = (canvas.height * imgW) / canvas.width;
+        const box = document.createElement("div");
+        box.className = `zone-box ${z.css}`;
+        box.innerHTML = `
+          <div class="zone-top">${z.name}</div>
+          <div class="zone-mid">
+            <div class="zone-range">${loBpm}–${hiBpm}</div>
+            <div class="zone-factor">${fmtFactor(z.lo, z.hi)} · bpm</div>
+          </div>
+          <div class="zone-goal">
+            <strong>Ziel / Inhalt</strong>
+            ${z.goal}
+          </div>
+        `;
+        grid.appendChild(box);
 
-    if (imgH <= pageH - margin * 2){
-      pdf.addImage(imgData, "JPEG", margin, margin, imgW, imgH);
-    } else {
-      // slice
-      const pxPerMm = canvas.width / imgW;
-      const innerH = pageH - margin * 2;
-      const slicePxH = Math.floor(innerH * pxPerMm);
-
-      let yPx = 0;
-      let page = 0;
-      while (yPx < canvas.height){
-        const slice = document.createElement("canvas");
-        slice.width = canvas.width;
-        slice.height = Math.min(slicePxH, canvas.height - yPx);
-
-        const ctx = slice.getContext("2d");
-        ctx.drawImage(canvas, 0, yPx, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
-
-        const sliceData = slice.toDataURL("image/jpeg", jpegQuality);
-        if (page > 0) pdf.addPage();
-
-        const sliceHmm = slice.height / pxPerMm;
-        pdf.addImage(sliceData, "JPEG", margin, margin, imgW, sliceHmm);
-
-        yPx += slicePxH;
-        page += 1;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><span class="zone-name">${z.name}</span></td>
+          <td>${fmtFactor(z.lo, z.hi)}</td>
+          <td><span class="range-strong">${loBpm}</span></td>
+          <td><span class="range-strong">${hiBpm}</span></td>
+          <td>${z.goal}</td>
+        `;
+        body.appendChild(tr);
       }
     }
 
-    const now = new Date();
-    const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}`;
-    const safeName = (document.getElementById("personName").value || "").trim().replace(/[^\w\-äöüÄÖÜß ]/g, "");
-    const namePart = safeName ? `_${safeName.replace(/\s+/g, "_")}` : "";
-    pdf.save(`RVSH_Trainingszonen${namePart}_${stamp}.pdf`);
+    function calculate(){
+      const name = (document.getElementById("personName").value || "").trim();
+      const hfMax = clampNumber(parseInt(document.getElementById("hfMax").value, 10), 80, 260);
+      const ruhe = clampNumber(parseInt(document.getElementById("ruhepuls").value, 10), 30, 120);
 
-    document.body.classList.remove("exporting");
-    setBadge(true, "PDF gespeichert");
-  }
+      if (hfMax === null || ruhe === null){
+        setBadge(false, "Bitte Werte eingeben");
+        return;
+      }
 
-  document.getElementById("calcBtn").addEventListener("click", calculate);
-  document.getElementById("pdfBtn").addEventListener("click", exportPdf);
-  document.getElementById("printBtn").addEventListener("click", () => window.print());
+      if (ruhe >= hfMax){
+        setBadge(false, "Ruhepuls muss < HFmax sein");
+        return;
+      }
 
-  ["personName","hfMax","ruhepuls","lt1Lo","lt1Hi","lt2Lo","lt2Hi"].forEach(id => {
-    document.getElementById(id).addEventListener("input", calculate);
-  });
+      document.getElementById("nameOut").textContent = name || "–";
+      document.getElementById("hfMaxOut").textContent = hfMax;
+      document.getElementById("ruhepulsOut").textContent = ruhe;
 
-  document.getElementById("year").textContent = String(new Date().getFullYear());
+      renderZones(hfMax, ruhe);
+      setBadge(true, "berechnet");
+    }
 
-  calculate();
-</script>
+    async function exportPdf(){
+      const area = document.getElementById("exportArea");
+      const { jsPDF } = window.jspdf || {};
+
+      if (!jsPDF || !window.html2canvas){
+        setBadge(false, "PDF-Libs nicht geladen");
+        alert("PDF-Export konnte nicht geladen werden. Bitte Internet prüfen oder alternativ 'Drucken' nutzen.");
+        return;
+      }
+
+      setBadge(true, "PDF wird erzeugt…");
+      document.body.classList.add("exporting");
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const scale = Math.min(1.5, Math.max(1.1, window.devicePixelRatio || 1));
+
+      const canvas = await window.html2canvas(area, {
+        scale,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        removeContainer: true
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.86);
+      const pdf = new jsPDF({
+        orientation: "p",
+        unit: "mm",
+        format: "a4",
+        compress: true
+      });
+
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+
+      const imgW = pageW - (margin * 2);
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      if (imgH <= pageH - (margin * 2)) {
+        pdf.addImage(imgData, "JPEG", margin, margin, imgW, imgH);
+      } else {
+        const pxPerMm = canvas.width / imgW;
+        const innerH = pageH - (margin * 2);
+        const slicePxH = Math.floor(innerH * pxPerMm);
+
+        let yPx = 0;
+        let page = 0;
+
+        while (yPx < canvas.height) {
+          const slice = document.createElement("canvas");
+          slice.width = canvas.width;
+          slice.height = Math.min(slicePxH, canvas.height - yPx);
+
+          const ctx = slice.getContext("2d");
+          ctx.drawImage(
+            canvas,
+            0, yPx, canvas.width, slice.height,
+            0, 0, canvas.width, slice.height
+          );
+
+          const sliceData = slice.toDataURL("image/jpeg", 0.86);
+
+          if (page > 0) pdf.addPage();
+
+          const sliceHmm = slice.height / pxPerMm;
+          pdf.addImage(sliceData, "JPEG", margin, margin, imgW, sliceHmm);
+
+          yPx += slicePxH;
+          page += 1;
+        }
+      }
+
+      const now = new Date();
+      const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+      const safeName = (document.getElementById("personName").value || "")
+        .trim()
+        .replace(/[^\w\-äöüÄÖÜß ]/g, "");
+      const namePart = safeName ? `_${safeName.replace(/\s+/g, "_")}` : "";
+
+      pdf.save(`RVSH_Trainingszonen${namePart}_${stamp}.pdf`);
+
+      document.body.classList.remove("exporting");
+      setBadge(true, "PDF gespeichert");
+    }
+
+    document.getElementById("calcBtn").addEventListener("click", calculate);
+    document.getElementById("pdfBtn").addEventListener("click", exportPdf);
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    ["personName", "hfMax", "ruhepuls"].forEach(id => {
+      document.getElementById(id).addEventListener("input", calculate);
+    });
+
+    document.getElementById("year").textContent = String(new Date().getFullYear());
+
+    calculate();
+  </script>
 </body>
 </html>
